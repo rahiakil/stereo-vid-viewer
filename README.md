@@ -1,28 +1,48 @@
 # Stereo Video Viewer
 
-Head-coupled stereoscopic viewer for `~/Downloads/vid1.mp4`, using the same
-webcam → MediaPipe face mesh → off-axis camera logic as `off-axis-sneaker`.
+Head-coupled viewer inspired by off-axis-sneaker: **MediaPipe** head pose +
+**Three.js** off-axis camera. Video becomes 3D via depth + optional rembg matte
+and per-frame textured GLBs.
+
+## Pipeline
+
+| Step | Library | Role |
+|---|---|---|
+| Depth | **Depth Anything V2** | per-frame depth from RGB |
+| Matte | **rembg** (U2-Net / BiRefNet) | clean character cutout (kills dust) |
+| Mesh → GLB | **trimesh** | FG textured meshes per frame |
+| Display | **Three.js** + **MediaPipe** | aisle video on screen + FG pop-out |
+
+Eye pose is applied **at runtime**. Large media (`*.mp4`, `*_glbs/`) are gitignored — bake locally.
 
 ## Run
 
 ```bash
 cd ~/Repos/stereo-vid-viewer
-npm install
 npm run dev
+# https://localhost:5177/  (or https://papa-debian:5177/)
 ```
 
-Open http://localhost:5177 — allow webcam.
+Default tab: **Sneaker demo** (BG video + matted GLB characters).
 
-## Modes
+## Bake depth / matte / GLBs
 
-- **Window (mono)** — single off-axis view; move head for parallax
-- **Side-by-side** — left/right eyes with IPD offset (cross-eyed or VR)
-- **Anaglyph** — red/cyan glasses
+```bash
+PY=/home/papa/Repos/hrr-basic-one/.venv/bin/python
 
-Video defaults to `public/media/vid1.mp4` (symlink to `~/Downloads/vid1.mp4`).
-Use the Upload button for another file.
+$PY scripts/estimate_depth_video.py \
+  --input ~/Downloads/vid-labu1.mp4 \
+  --output public/media/vid-labu1_depth.mp4 --max-side 640
 
-## Note on RDP
+$PY scripts/matte_video_rembg.py \
+  --input public/media/vid-labu1.mp4 \
+  --output public/media/vid-labu1_matte.mp4 \
+  --model u2net --max-side 640
 
-If you RDP from Windows into Debian, Cheese/this site only see cameras on the
-*Debian* machine unless you redirect/stream the Windows webcam.
+$PY scripts/video_depth_to_glb.py \
+  --rgb public/media/vid-labu1.mp4 \
+  --depth public/media/vid-labu1_depth.mp4 \
+  --matte public/media/vid-labu1_matte.mp4 \
+  --out-dir public/media/vid-labu1_glbs \
+  --tex-max-side 768
+```
