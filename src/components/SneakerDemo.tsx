@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pause, Play } from 'lucide-react';
+import { Pause, Play, ChevronLeft, ChevronRight, Activity, Sliders, Video } from 'lucide-react';
 import FaceTracker from './FaceTracker';
 import { HeadPose } from '../utils/headPose';
 import { DepthMeshScene, DepthMeshStats } from '../utils/depthMeshScene';
@@ -34,6 +34,11 @@ export default function SneakerDemo() {
   const [stats, setStats] = useState<DepthMeshStats | null>(null);
   const [relief, setRelief] = useState(0.14);
   const [alphaCut, setAlphaCut] = useState(0.35);
+
+  // Panel visibility — collapsed by default on small screens
+  const [showInspector, setShowInspector] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -75,7 +80,6 @@ export default function SneakerDemo() {
     };
   }, []);
 
-  // Mark ready when stats say all streams are loaded
   useEffect(() => {
     if (stats && stats.streamsReady >= stats.streamsTotal && !ready) {
       setReady(true);
@@ -101,29 +105,49 @@ export default function SneakerDemo() {
       : 0;
 
   return (
-    <div style={{ flex: 1, position: 'relative', minHeight: '70vh' }}>
+    <div style={{ flex: 1, position: 'relative', minHeight: '70vh', overflow: 'hidden' }}>
       <div ref={mountRef} style={{ position: 'absolute', inset: 0 }} />
 
-      {/* Load / stream inspector */}
+      {/* ===== Right edge: toggle buttons ===== */}
+      <div style={edgeToggleStyle('right')}>
+        <EdgeButton
+          icon={<Activity size={16} />}
+          active={showInspector}
+          onClick={() => setShowInspector(!showInspector)}
+          title="Stream inspector"
+        />
+        <EdgeButton
+          icon={<Video size={16} />}
+          active={showCamera}
+          onClick={() => setShowCamera(!showCamera)}
+          title="Webcam"
+        />
+      </div>
+
+      {/* ===== Left edge: toggle button ===== */}
+      <div style={edgeToggleStyle('left')}>
+        <EdgeButton
+          icon={<Sliders size={16} />}
+          active={showControls}
+          onClick={() => setShowControls(!showControls)}
+          title="Controls"
+        />
+      </div>
+
+      {/* ===== Slideable: Stream inspector (right) ===== */}
       <div
         style={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          zIndex: 6,
-          width: 290,
-          background: 'rgba(8,12,18,0.88)',
-          border: '1px solid #2a3848',
-          borderRadius: 10,
-          padding: 12,
-          fontSize: 11,
-          lineHeight: 1.5,
-          color: '#c5d0dc',
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+          ...panelBase,
+          top: 48,
+          right: showInspector ? 12 : -320,
+          transition: 'right 0.3s ease',
         }}
       >
-        <div style={{ fontWeight: 700, color: '#fff', marginBottom: 6, fontSize: 12 }}>
-          Stream inspector
+        <div style={panelHeader}>
+          <span style={{ fontWeight: 700, color: '#fff', fontSize: 12 }}>Stream inspector</span>
+          <button style={closeBtn} onClick={() => setShowInspector(false)}>
+            <ChevronRight size={16} />
+          </button>
         </div>
         {!stats ? (
           <div>Waiting…</div>
@@ -140,94 +164,53 @@ export default function SneakerDemo() {
                   {stats.streamsReady}/{stats.streamsTotal} ({streamsPct}%)
                 </span>
               </div>
-              <div
-                style={{
-                  marginTop: 4,
-                  height: 6,
-                  borderRadius: 3,
-                  background: '#1c2836',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  style={{
-                    width: `${streamsPct}%`,
-                    height: '100%',
-                    background: streamsPct >= 100 ? '#3ecf8e' : '#5b9fd4',
-                  }}
-                />
+              <div style={barTrack}>
+                <div style={{ ...barFill, width: `${streamsPct}%`, background: streamsPct >= 100 ? '#3ecf8e' : '#5b9fd4' }} />
               </div>
             </div>
             <Row label="elapsed" value={fmtMs(stats.elapsedMs)} />
             <Row
               label="BG stream"
-              value={
-                stats.bgBytes != null
-                  ? `${stats.bgLabel} · ${fmtMB(stats.bgBytes)}`
-                  : stats.bgLabel
-              }
+              value={stats.bgBytes != null ? `${stats.bgLabel} · ${fmtMB(stats.bgBytes)}` : stats.bgLabel}
             />
-            <div style={{ borderTop: '1px solid #2a3848', margin: '8px 0' }} />
+            <div style={divider} />
             <div style={{ color: '#8fa3b8', marginBottom: 4 }}>what the browser assembles</div>
             <div style={{ marginBottom: 2 }}>RGB video → foreground texture</div>
             <div style={{ marginBottom: 2 }}>depth video → displaces one grid mesh</div>
             <div style={{ marginBottom: 2 }}>matte video → clean FG cutout</div>
             <div style={{ marginBottom: 2 }}>bg_clean → aisle on screen plane</div>
-            <div style={{ borderTop: '1px solid #2a3848', margin: '8px 0' }} />
-            <div style={{ color: '#8fa3b8' }}>no per-frame GLB downloads</div>
-            <div style={{ color: '#3ecf8e' }}>
+            <div style={divider} />
+            <div style={{ color: ready ? '#3ecf8e' : '#8fa3b8' }}>
               {ready ? '✓ playing from streams' : 'loading…'}
             </div>
           </>
         )}
       </div>
 
+      {/* ===== Slideable: Controls (left) ===== */}
       <div
         style={{
-          position: 'absolute',
-          right: 12,
+          ...panelBase,
           bottom: 12,
-          width: 240,
-          height: 180,
-          borderRadius: 10,
-          overflow: 'hidden',
-          border: '2px solid #fff',
-          zIndex: 5,
+          left: showControls ? 12 : -320,
+          transition: 'left 0.3s ease',
         }}
       >
-        <FaceTracker onHeadPose={onHeadPose} />
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          left: 12,
-          bottom: 12,
-          zIndex: 5,
-          background: 'rgba(0,0,0,0.72)',
-          borderRadius: 10,
-          padding: 12,
-          width: 280,
-          fontSize: 12,
-          border: '1px solid #2a3848',
-          lineHeight: 1.45,
-        }}
-      >
-        <div style={{ fontWeight: 700, color: '#fff', marginBottom: 4 }}>Depth-mesh demo</div>
-        <div style={{ color: '#8fa3b8', marginBottom: 8 }}>{status}</div>
+        <div style={panelHeader}>
+          <span style={{ fontWeight: 700, color: '#fff', fontSize: 12 }}>Depth-mesh demo</span>
+          <button style={closeBtn} onClick={() => setShowControls(false)}>
+            <ChevronLeft size={16} />
+          </button>
+        </div>
+        <div style={{ color: '#8fa3b8', marginBottom: 6 }}>{status}</div>
         <div style={{ color: '#8fa3b8', marginBottom: 8 }}>{poseLabel}</div>
         <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-          <button
-            type="button"
-            onClick={togglePlay}
-            disabled={!ready}
-            style={btnStyle(ready)}
-          >
+          <button type="button" onClick={togglePlay} disabled={!ready} style={btnStyle(ready)}>
             {playing ? <Pause size={14} /> : <Play size={14} />}
             {playing ? 'Pause' : 'Play'}
           </button>
         </div>
-        <label style={{ display: 'block', marginBottom: 6, color: '#a8b8c8' }}>
+        <label style={sliderLabel}>
           Pop-out {relief.toFixed(2)}
           <input
             type="range"
@@ -242,7 +225,7 @@ export default function SneakerDemo() {
             style={{ width: '100%' }}
           />
         </label>
-        <label style={{ display: 'block', color: '#a8b8c8' }}>
+        <label style={sliderLabel}>
           Cut {alphaCut.toFixed(2)}
           <input
             type="range"
@@ -258,10 +241,132 @@ export default function SneakerDemo() {
           />
         </label>
         <p style={{ margin: '8px 0 0', color: '#8fa3b8' }}>
-          Browser builds the mesh from 4 video streams. Sliders are instant — no re-bake.
+          Browser builds the mesh from 4 video streams. Sliders are instant.
         </p>
       </div>
+
+      {/* ===== Slideable: Face tracker (right-bottom) ===== */}
+      <div
+        style={{
+          position: 'absolute',
+          right: showCamera ? 12 : -260,
+          bottom: 12,
+          width: 240,
+          height: 180,
+          borderRadius: 10,
+          overflow: 'hidden',
+          border: '2px solid #fff',
+          zIndex: 5,
+          transition: 'right 0.3s ease',
+        }}
+      >
+        <FaceTracker onHeadPose={onHeadPose} />
+      </div>
     </div>
+  );
+}
+
+// ===== Styles =====
+const panelBase: React.CSSProperties = {
+  position: 'absolute',
+  zIndex: 6,
+  width: 290,
+  maxHeight: 'calc(100% - 60px)',
+  overflow: 'auto',
+  background: 'rgba(8,12,18,0.92)',
+  border: '1px solid #2a3848',
+  borderRadius: 10,
+  padding: 12,
+  fontSize: 11,
+  lineHeight: 1.5,
+  color: '#c5d0dc',
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+};
+
+const panelHeader: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 8,
+};
+
+const closeBtn: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  color: '#8fa3b8',
+  cursor: 'pointer',
+  padding: 2,
+  display: 'flex',
+  alignItems: 'center',
+};
+
+const divider: React.CSSProperties = {
+  borderTop: '1px solid #2a3848',
+  margin: '8px 0',
+};
+
+const barTrack: React.CSSProperties = {
+  marginTop: 4,
+  height: 6,
+  borderRadius: 3,
+  background: '#1c2836',
+  overflow: 'hidden',
+};
+
+const barFill: React.CSSProperties = {
+  height: '100%',
+  borderRadius: 3,
+};
+
+const sliderLabel: React.CSSProperties = {
+  display: 'block',
+  marginBottom: 6,
+  color: '#a8b8c8',
+  fontSize: 12,
+};
+
+function edgeToggleStyle(side: 'left' | 'right'): React.CSSProperties {
+  return {
+    position: 'absolute',
+    top: 12,
+    [side]: 4,
+    zIndex: 7,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
+  };
+}
+
+function EdgeButton({
+  icon,
+  active,
+  onClick,
+  title,
+}: {
+  icon: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+  title: string;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onClick={onClick}
+      style={{
+        padding: 8,
+        borderRadius: 8,
+        border: '1px solid #2a3848',
+        background: active ? '#5b9fd4' : 'rgba(8,12,18,0.88)',
+        color: '#fff',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {icon}
+    </button>
   );
 }
 
@@ -277,6 +382,7 @@ function btnStyle(ready: boolean): React.CSSProperties {
     alignItems: 'center',
     gap: 6,
     fontWeight: 600,
+    fontSize: 12,
   };
 }
 
