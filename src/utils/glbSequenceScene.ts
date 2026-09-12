@@ -9,6 +9,26 @@ export type SequenceMeta = {
   every?: number;
 };
 
+/** Live load telemetry for the sidebar. */
+export type LoadStats = {
+  phase: string;
+  detail: string;
+  warmDone: number;
+  warmTotal: number;
+  bytesLoaded: number;
+  downloadMs: number;
+  parseMs: number;
+  lastFile: string;
+  lastBytes: number;
+  lastDownloadMs: number;
+  lastParseMs: number;
+  cacheCount: number;
+  totalFrames: number;
+  bgLabel: string;
+  bgBytes: number | null;
+  elapsedMs: number;
+};
+
 /**
  * Sneaker-parity player: real GLB meshes + wireframe room + off-axis head camera.
  * Streams a small ring of frames (does not keep all 440 in GPU memory).
@@ -37,12 +57,27 @@ export class GlbSequenceScene {
   private fps = 30;
   private modelRoot = new THREE.Group();
   private status: (msg: string) => void;
+  private onStats: ((s: LoadStats) => void) | null;
   private prefetchAhead = 10;
   private maxCache = 24;
+  private warmConcurrency = 6;
   private base = '';
   private bgVideo: HTMLVideoElement | null = null;
   private bgTexture: THREE.VideoTexture | null = null;
   private bgMesh: THREE.Mesh | null = null;
+  private bgLabel = 'none';
+  private bgBytes: number | null = null;
+  private bytesLoaded = 0;
+  private downloadMs = 0;
+  private parseMs = 0;
+  private warmDone = 0;
+  private warmTotal = 0;
+  private lastFile = '';
+  private lastBytes = 0;
+  private lastDownloadMs = 0;
+  private lastParseMs = 0;
+  private loadStartedMs = 0;
+  private phase = 'idle';
 
   constructor(
     private container: HTMLElement,
@@ -50,8 +85,10 @@ export class GlbSequenceScene {
     cal: Calibration,
     onStatus?: (msg: string) => void,
     bgVideoSrc?: string | null,
+    onStats?: (s: LoadStats) => void,
   ) {
     this.status = onStatus ?? (() => undefined);
+    this.onStats = onStats ?? null;
     this.base = baseUrl.replace(/\/$/, '');
     const w = container.clientWidth || 800;
     const h = container.clientHeight || 450;
@@ -83,7 +120,37 @@ export class GlbSequenceScene {
     this.createWireframeRoom();
   }
 
+  private emitStats(detail: string) {
+    this.onStats?.({
+      phase: this.phase,
+      detail,
+      warmDone: this.warmDone,
+      warmTotal: this.warmTotal,
+      bytesLoaded: this.bytesLoaded,
+      downloadMs: this.downloadMs,
+      parseMs: this.parseMs,
+      lastFile: this.lastFile,
+      lastBytes: this.lastBytes,
+      lastDownloadMs: this.lastDownloadMs,
+      lastParseMs: this.lastParseMs,
+      cacheCount: this.cache.size,
+      totalFrames: this.files.length,
+      bgLabel: this.bgLabel,
+      bgBytes: this.bgBytes,
+      elapsedMs: this.loadStartedMs ? performance.now() - this.loadStartedMs : 0,
+    });
+  }
+
   private setupBackgroundVideo(src: string) {
+    this.bgLabel = src.includes('bg_clean') ? 'AI-cleaned aisle MP4' : 'original RGB MP4';
+    void fetch(src, { method: 'HEAD' })
+      .then((r) => {
+        const len = r.headers.get('content-length');
+        if (len) this.bgBytes = Number(len);
+        this.emitStats(`BG HEAD ${this.bgLabel}`);
+      })
+      .catch(() => undefined);
+
     const v = document.createElement('video');
     v.src = src;
     v.crossOrigin = 'anonymous';
@@ -101,12 +168,11 @@ export class GlbSequenceScene {
 
     const screenW = this.offAxis.screenW;
     const screenH = this.offAxis.screenH;
-    // Placeholder size; corrected on metadata
     const mesh = new THREE.Mesh(
       new THREE.PlaneGeometry(screenW * 0.98, screenH * 0.98),
       new THREE.MeshBasicMaterial({ map: tex }),
     );
-    mesh.position.z = -0.01; // locked on/behind screen plane
+    mesh.position.z = -0.01;
     mesh.renderOrder = 0;
     this.bgMesh = mesh;
     this.scene.add(mesh);
@@ -130,18 +196,43 @@ export class GlbSequenceScene {
   }
 
   async loadSequence(): Promise<void> {
+    this.loadStartedMs = performance.now();
+    this.phase = 'sequence.json';
     this.status('Loading sequence…');
+    this.emitStats('fetch sequence.json');
+
     const meta = (await fetch(`${this.base}/sequence.json`).then((r) => r.json())) as SequenceMeta;
     this.fps = meta.fps || 30;
     this.files = meta.files || [];
     if (!this.files.length) throw new Error('No frames in sequence.json');
 
-    this.status(`Warming first frames… 0/${Math.min(20, this.files.length)}`);
-    for (let i = 0; i < Math.min(20, this.files.length); i++) {
-      await this.ensureFrame(i);
-      if (i % 4 === 0) this.status(`Warming first frames… ${i + 1}/20`);
-    }
-    this.status(`Ready · ${this.files.length} frames @ ${this.fps.toFixed(0)}fps (streaming)`);
+    this.warmTotal = Math.min(20, this.files.length);
+    this.warmDone = 0;
+    this.phase = 'warm GLBs';
+    this.status(`Warming first frames… 0/${this.warmTotal}`);
+    this.emitStats(`parallel×${this.warmConcurrency} textured GLB meshes`);
+
+    // Parallel warm — sequential was the main reason it felt stuck
+    let next = 0;
+    const worker = async () => {
+      while (next < this.warmTotal) {
+        const i = next++;
+        await this.ensureFrame(i);
+        this.warmDone++;
+        this.status(`Warming first frames… ${this.warmDone}/${this.warmTotal}`);
+        this.emitStats(`warmed frame_${String(i).padStart(5, '0')}.glb`);
+      }
+    };
+    await Promise.all(
+      Array.from({ length: Math.min(this.warmConcurrency, this.warmTotal) }, () => worker()),
+    );
+
+    this.phase = 'ready';
+    const elapsed = ((performance.now() - this.loadStartedMs) / 1000).toFixed(1);
+    this.status(
+      `Ready · ${this.files.length} frames @ ${this.fps.toFixed(0)}fps · warm ${elapsed}s`,
+    );
+    this.emitStats('warmup complete — streaming more GLBs while playing');
     this.showFrame(0);
     this.startMs = performance.now();
     if (this.bgVideo) {
@@ -171,8 +262,37 @@ export class GlbSequenceScene {
     if (this.inflight.has(i)) return this.inflight.get(i)!;
 
     const p = (async () => {
+      const url = this.frameUrl(i);
+      const name = this.files[i] || `frame_${i}`;
       try {
-        const gltf = await this.loader.loadAsync(this.frameUrl(i));
+        const t0 = performance.now();
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const buf = await res.arrayBuffer();
+        const downloadMs = performance.now() - t0;
+        const bytes = buf.byteLength;
+
+        const t1 = performance.now();
+        const gltf = await new Promise<Awaited<ReturnType<GLTFLoader['loadAsync']>>>(
+          (resolve, reject) => {
+            this.loader.parse(
+              buf,
+              this.base + '/',
+              (g) => resolve(g),
+              (e) => reject(e),
+            );
+          },
+        );
+        const parseMs = performance.now() - t1;
+
+        this.bytesLoaded += bytes;
+        this.downloadMs += downloadMs;
+        this.parseMs += parseMs;
+        this.lastFile = name;
+        this.lastBytes = bytes;
+        this.lastDownloadMs = downloadMs;
+        this.lastParseMs = parseMs;
+
         gltf.scene.traverse((obj) => {
           const mesh = obj as THREE.Mesh;
           if (mesh.isMesh) {
@@ -182,7 +302,6 @@ export class GlbSequenceScene {
               map.colorSpace = THREE.SRGBColorSpace;
               map.needsUpdate = true;
             }
-            // Basic + texture = crisp (no muddy lighting on video bake)
             mesh.material = new THREE.MeshBasicMaterial({
               map,
               vertexColors: !map,
@@ -197,9 +316,10 @@ export class GlbSequenceScene {
         this.modelRoot.add(gltf.scene);
         this.cache.set(i, gltf.scene);
         this.trimCache(i);
+        if (this.phase === 'ready') this.emitStats(`stream ${name}`);
         return gltf.scene;
       } catch (e) {
-        console.warn('GLB load failed', this.frameUrl(i), e);
+        console.warn('GLB load failed', url, e);
         return null;
       } finally {
         this.inflight.delete(i);

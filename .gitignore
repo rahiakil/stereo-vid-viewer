@@ -5,6 +5,7 @@ dist
 .env
 .env.*
 !.env.example
+# Full-res media (too big for repo; bake locally)
 public/media/*.mp4
 public/media/*.webm
 public/media/*.mkv
@@ -13,3 +14,6 @@ public/media/*_mv/
 public/media/*.log
 certs/
 *.tsbuildinfo
+# Slim demo media IS committed for GitHub Pages
+!public/media/demo/
+!public/media/demo/*.mp4

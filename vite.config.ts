@@ -8,14 +8,18 @@ const certFile = path.join(certDir, 'cert.pem');
 const keyFile = path.join(certDir, 'key.pem');
 const hasCerts = fs.existsSync(certFile) && fs.existsSync(keyFile);
 
+// GitHub Pages serves at https://<user>.github.io/<repo>/
+// Vite needs base to match the subpath
+const isProd = process.env.NODE_ENV === 'production';
+const base = isProd ? '/stereo-vid-viewer/' : '/';
+
 export default defineConfig({
+  base,
   plugins: [react()],
   server: {
     host: true,
     port: 5177,
     allowedHosts: ['papa-debian', 'localhost', '.local'],
-    // getUserMedia requires a secure context (HTTPS or localhost).
-    // LAN hostnames like http://papa-debian are blocked — use HTTPS.
     https: hasCerts
       ? {
           key: fs.readFileSync(keyFile),
