@@ -10,10 +10,11 @@ const DEFAULT_CAL = {
   viewingDistanceCm: 60,
 };
 
-const FG_VIDEO = '/media/demo/rgb.mp4';
-const DEPTH_VIDEO = '/media/demo/depth.mp4';
-const MATTE_VIDEO = '/media/demo/matte.mp4';
-const BG_VIDEO = '/media/demo/bg_clean.mp4';
+const BASE = import.meta.env.BASE_URL;
+const FG_VIDEO = `${BASE}media/demo/rgb.mp4`;
+const DEPTH_VIDEO = `${BASE}media/demo/depth.mp4`;
+const MATTE_VIDEO = `${BASE}media/demo/matte.mp4`;
+const BG_VIDEO = `${BASE}media/demo/bg_clean.mp4`;
 const BG_VIDEO_FALLBACK = FG_VIDEO;
 
 function fmtMB(bytes: number) {
