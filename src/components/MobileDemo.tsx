@@ -76,7 +76,7 @@ export default function MobileDemo() {
     // Create scene synchronously (no await) so video.play() stays within the user gesture.
     const mount = mountRef.current;
     if (!mount) return;
-      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.5, 4);
+      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.35, 4);
     sceneRef.current = scene;
     scene.start();
     const onResize = () => sceneRef.current?.resize();
@@ -156,9 +156,32 @@ export default function MobileDemo() {
           zIndex: 8, pointerEvents: 'none',
         }}>
           <span style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>Labubu 3D</span>
-          <span style={{ color: ready ? '#3ecf8e' : '#8fa3b8', fontSize: 11 }}>
-            {ready ? '● live' : 'loading…'}
-          </span>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', pointerEvents: 'auto' }}>
+            <span style={{ color: ready ? '#3ecf8e' : '#8fa3b8', fontSize: 11 }}>
+              {ready ? '● live' : 'loading…'}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                // Bypass cache by appending a cache-buster query param
+                const url = new URL(window.location.href);
+                url.searchParams.set('v', String(Date.now()));
+                window.location.href = url.toString();
+              }}
+              style={{
+                padding: '4px 10px',
+                borderRadius: 6,
+                border: '1px solid #2a3848',
+                background: '#1c2836',
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: 11,
+                fontWeight: 600,
+              }}
+            >
+              ↻ Refresh
+            </button>
+          </div>
         </div>
       )}
 
