@@ -317,7 +317,9 @@ export class DepthMeshScene {
   }
 
   setHeadPose(pose: HeadPose | null) {
-    if (pose) this.pose = pose;
+    if (pose && Number.isFinite(pose.x) && Number.isFinite(pose.y) && Number.isFinite(pose.z)) {
+      this.pose = pose;
+    }
   }
 
   setRelief(r: number) {

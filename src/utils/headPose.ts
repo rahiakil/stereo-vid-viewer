@@ -50,6 +50,16 @@ export class HeadPoseTracker {
     const leftEyeOuter = landmarks[33];
     const rightEyeOuter = landmarks[263];
 
+    // Guard against NaN landmarks (MediaPipe can return garbage on mobile).
+    if (
+      !leftEyeInner || !rightEyeInner || !noseTip || !leftEyeOuter || !rightEyeOuter ||
+      !Number.isFinite(leftEyeInner.x) || !Number.isFinite(rightEyeInner.x) ||
+      !Number.isFinite(noseTip.x) || !Number.isFinite(leftEyeInner.y) ||
+      !Number.isFinite(rightEyeInner.y) || !Number.isFinite(noseTip.y)
+    ) {
+      return this.baseline ? { ...this.smoothed } : { ...this.smoothed };
+    }
+
     const faceX = (leftEyeInner.x + rightEyeInner.x + noseTip.x) / 3;
     const faceY = (leftEyeInner.y + rightEyeInner.y + noseTip.y) / 3;
 
@@ -63,6 +73,11 @@ export class HeadPoseTracker {
     );
     const depthProxy = (interOcularDist + eyeWidth * 0.5) / (this.baseInterOcular * 1.5);
 
+    // Reject this frame entirely if any value is non-finite.
+    if (!Number.isFinite(faceX) || !Number.isFinite(faceY) || !Number.isFinite(depthProxy)) {
+      return { ...this.smoothed };
+    }
+
     const target = {
       x: Math.max(0.2, Math.min(0.8, faceX)),
       y: Math.max(0.2, Math.min(0.8, faceY)),
@@ -74,15 +89,33 @@ export class HeadPoseTracker {
     this.smoothed.y += s * (target.y - this.smoothed.y);
     this.smoothed.z += s * (target.z - this.smoothed.z);
 
+    // Safety: if NaN somehow got into smoothed, reset to center.
+    if (!Number.isFinite(this.smoothed.x) || !Number.isFinite(this.smoothed.y) || !Number.isFinite(this.smoothed.z)) {
+      this.smoothed = { x: 0.5, y: 0.5, z: 1 };
+      this.baseline = null;
+      this.calibrating = false;
+      this.calibSamples = [];
+      return { ...this.smoothed };
+    }
+
     // Collect calibration samples, then freeze a baseline.
     if (this.calibrating) {
       this.calibSamples.push({ ...this.smoothed });
       if (this.calibSamples.length >= this.calibTarget) {
-        const avg = this.calibSamples.reduce(
+        const valid = this.calibSamples.filter(
+          (p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z),
+        );
+        if (valid.length === 0) {
+          // All samples were bad — try again
+          this.calibrating = false;
+          this.calibSamples = [];
+          return { ...this.smoothed };
+        }
+        const avg = valid.reduce(
           (a, p) => ({ x: a.x + p.x, y: a.y + p.y, z: a.z + p.z }),
           { x: 0, y: 0, z: 0 },
         );
-        const n = this.calibSamples.length;
+        const n = valid.length;
         this.baseline = { x: avg.x / n, y: avg.y / n, z: avg.z / n };
         this.calibrating = false;
       }
