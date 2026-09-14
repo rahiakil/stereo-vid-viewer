@@ -13,7 +13,7 @@ const MOBILE_CAL = {
   screenWidthCm: 7,
   screenHeightCm: 14,
   viewingDistanceCm: 25,
-  movementScale: 0.6,
+  movementScale: 0.3,
 };
 
 const BASE = import.meta.env.BASE_URL;
@@ -33,7 +33,7 @@ export default function MobileDemo() {
   const [playing, setPlaying] = useState(true);
   const [ready, setReady] = useState(false);
   const [stats, setStats] = useState<DepthMeshStats | null>(null);
-  const [relief, setRelief] = useState(0.04);
+  const [relief, setRelief] = useState(0.02);
   const [alphaCut, setAlphaCut] = useState(0.35);
   const [started, setStarted] = useState(false);
   const [sheet, setSheet] = useState<Sheet>('none');
@@ -76,7 +76,7 @@ export default function MobileDemo() {
     // Create scene synchronously (no await) so video.play() stays within the user gesture.
     const mount = mountRef.current;
     if (!mount) return;
-      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.72, 3);
+      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.5, 4);
     sceneRef.current = scene;
     scene.start();
     const onResize = () => sceneRef.current?.resize();
@@ -258,7 +258,7 @@ export default function MobileDemo() {
       {started && (
         <BottomSheet open={sheet === 'camera'} onClose={() => setSheet('none')} title="Face tracker">
           <div style={{ width: '100%', aspectRatio: '4 / 3', borderRadius: 10, overflow: 'hidden', border: '2px solid #2a3848', background: '#000' }}>
-            <FaceTracker onHeadPose={onHeadPose} smoothingFactor={0.15} autoCalibrate />
+            <FaceTracker onHeadPose={onHeadPose} smoothingFactor={0.08} autoCalibrate />
           </div>
           <p style={{ margin: '10px 0 0', color: '#8fa3b8', fontSize: 12 }}>{poseLabel}</p>
         </BottomSheet>
