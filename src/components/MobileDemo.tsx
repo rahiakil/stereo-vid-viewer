@@ -12,7 +12,7 @@ import { DepthMeshScene, DepthMeshStats } from '../utils/depthMeshScene';
 const MOBILE_CAL = {
   screenWidthCm: 7,
   screenHeightCm: 14,
-  viewingDistanceCm: 25,
+  viewingDistanceCm: 45,
   movementScale: 0.3,
 };
 
@@ -33,7 +33,7 @@ export default function MobileDemo() {
   const [playing, setPlaying] = useState(true);
   const [ready, setReady] = useState(false);
   const [stats, setStats] = useState<DepthMeshStats | null>(null);
-  const [relief, setRelief] = useState(0.005);
+  const [relief, setRelief] = useState(0.025);
   const [alphaCut, setAlphaCut] = useState(0.35);
   const [started, setStarted] = useState(false);
   const [sheet, setSheet] = useState<Sheet>('none');
@@ -230,7 +230,7 @@ export default function MobileDemo() {
           </button>
           <label style={sliderLabel}>
             Pop-out {relief.toFixed(3)}
-            <input type="range" min={0} max={0.05} step={0.002} value={relief}
+            <input type="range" min={0} max={0.08} step={0.003} value={relief}
               onChange={(e) => { setRelief(+e.target.value); sceneRef.current?.setRelief(+e.target.value); }}
               style={{ width: '100%' }} />
           </label>
