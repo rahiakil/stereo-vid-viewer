@@ -5,6 +5,8 @@ export interface Calibration {
   screenWidthCm: number;
   screenHeightCm: number;
   viewingDistanceCm: number;
+  /** Amplifies head-pose → eye movement. Desktop ~1.5, phone ~0.6. */
+  movementScale?: number;
 }
 
 export interface WorldEye {
@@ -19,6 +21,7 @@ export class OffAxisCamera {
   screenW: number;
   screenH: number;
   viewingDistanceCm: number;
+  movementScale: number;
   near = 0.05;
   far = 1000;
 
@@ -26,19 +29,21 @@ export class OffAxisCamera {
     this.screenW = cal.screenWidthCm * WORLD_SCALE;
     this.screenH = cal.screenHeightCm * WORLD_SCALE;
     this.viewingDistanceCm = cal.viewingDistanceCm;
+    this.movementScale = cal.movementScale ?? 1.5;
   }
 
   updateCalibration(cal: Calibration) {
     this.screenW = cal.screenWidthCm * WORLD_SCALE;
     this.screenH = cal.screenHeightCm * WORLD_SCALE;
     this.viewingDistanceCm = cal.viewingDistanceCm;
+    this.movementScale = cal.movementScale ?? 1.5;
   }
 
   /** Map normalized face pose → world eye position (screen at z=0) */
   headPoseToWorld(pose: HeadPose, eyeOffsetX = 0): WorldEye {
-    const movementScale = 1.5;
-    const x = -(pose.x - 0.5) * this.screenW * movementScale + eyeOffsetX;
-    const y = -(pose.y - 0.5) * this.screenH * movementScale;
+    const ms = this.movementScale;
+    const x = -(pose.x - 0.5) * this.screenW * ms + eyeOffsetX;
+    const y = -(pose.y - 0.5) * this.screenH * ms;
     const base = this.viewingDistanceCm * WORLD_SCALE;
     const z = base / Math.max(0.4, pose.z);
     return { x, y, z };

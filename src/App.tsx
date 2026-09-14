@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Maximize, Minimize, Play, Pause, Upload } from 'lucide-react';
+import { Maximize, Minimize, Play, Pause, Upload, Smartphone } from 'lucide-react';
 import FaceTracker from './components/FaceTracker';
 import MultiViewPlayer from './components/MultiViewPlayer';
 import SneakerDemo from './components/SneakerDemo';
 import { HeadPose } from './utils/headPose';
 import { StereoVideoScene, StereoMode } from './utils/stereoVideoScene';
+
+const MOBILE_URL = `${import.meta.env.BASE_URL}#/m`;
 
 const DEFAULT_VIDEO = '/media/vid-labu1.mp4';
 const DEFAULT_DEPTH = '/media/vid-labu1_depth.mp4';
@@ -154,6 +156,14 @@ export default function App() {
           <button type="button" onClick={toggleFs} style={btnStyle}>
             {fullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
           </button>
+          <a
+            href={MOBILE_URL}
+            title="Mobile-friendly viewer"
+            style={{ ...btnStyle, textDecoration: 'none' }}
+          >
+            <Smartphone size={14} />
+            Mobile
+          </a>
         </div>
       </header>
 
