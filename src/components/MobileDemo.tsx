@@ -17,10 +17,10 @@ const MOBILE_CAL = {
 };
 
 const BASE = import.meta.env.BASE_URL;
-const FG_VIDEO = `${BASE}media/demo/rgb.mp4`;
-const DEPTH_VIDEO = `${BASE}media/demo/depth.mp4`;
-const MATTE_VIDEO = `${BASE}media/demo/matte.mp4`;
-const BG_VIDEO = `${BASE}media/demo/bg_clean.mp4`;
+const FG_VIDEO = `${BASE}media/demo/mobile/rgb.mp4`;
+const DEPTH_VIDEO = `${BASE}media/demo/mobile/depth.mp4`;
+const MATTE_VIDEO = `${BASE}media/demo/mobile/matte.mp4`;
+const BG_VIDEO = `${BASE}media/demo/mobile/bg_clean.mp4`;
 const BG_VIDEO_FALLBACK = FG_VIDEO;
 
 type Sheet = 'none' | 'controls' | 'inspector' | 'camera';
@@ -64,7 +64,7 @@ export default function MobileDemo() {
         /* fall back */
       }
       if (cancelled) return;
-      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, bg, MOBILE_CAL, setStatus, setStats);
+      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, bg, MOBILE_CAL, setStatus, setStats, 360, 640);
       sceneRef.current = scene;
       scene.start();
     })();

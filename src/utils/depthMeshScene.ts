@@ -69,6 +69,8 @@ export class DepthMeshScene {
     cal: Calibration,
     onStatus?: (msg: string) => void,
     onStats?: (s: DepthMeshStats) => void,
+    private gridCols = 200,
+    private gridRows = 320,
   ) {
     this.status = onStatus ?? (() => undefined);
     this.onStats = onStats ?? null;
@@ -119,8 +121,6 @@ export class DepthMeshScene {
 
     // Reusable grid mesh — ONE geometry for the whole clip, displaced per-frame in shader
     const { contentW, contentH } = this.contentSize(9 / 16);
-    const gridCols = 200;
-    const gridRows = 320;
 
     // Foreground: depth-displaced, matte-cut, RGB-textured
     this.fgMat = new THREE.ShaderMaterial({
