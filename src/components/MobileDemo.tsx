@@ -73,26 +73,16 @@ export default function MobileDemo() {
     if (!started || !mountRef.current) return;
     let cancelled = false;
     let scene: DepthMeshScene | null = null;
-    void (async () => {
-      const mount = mountRef.current;
-      if (!mount) return;
-      let bg = BG_VIDEO_FALLBACK;
-      try {
-        const head = await fetch(BG_VIDEO, { method: 'HEAD' });
-        if (head.ok) bg = BG_VIDEO;
-      } catch {
-        /* fall back */
-      }
-      if (cancelled) return;
-      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, bg, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640);
-      sceneRef.current = scene;
-      scene.start();
-    })();
+    // Create scene synchronously (no await) so video.play() stays within the user gesture.
+    const mount = mountRef.current;
+    if (!mount) return;
+    scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640);
+    sceneRef.current = scene;
+    scene.start();
     const onResize = () => sceneRef.current?.resize();
     window.addEventListener('resize', onResize);
     window.addEventListener('orientationchange', onResize);
     return () => {
-      cancelled = true;
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
       scene?.dispose();
@@ -127,7 +117,19 @@ export default function MobileDemo() {
       {!started && (
         <button
           type="button"
-          onClick={() => setStarted(true)}
+          onClick={() => {
+            // Prime video playback within the user gesture (iOS Safari requires this
+            // — any await between the tap and video.play() can lose the gesture).
+            const primer = document.createElement('video');
+            primer.src = FG_VIDEO;
+            primer.muted = true;
+            primer.playsInline = true;
+            primer.preload = 'auto';
+            primer.style.display = 'none';
+            document.body.appendChild(primer);
+            primer.play().then(() => { primer.pause(); primer.remove(); }).catch(() => {});
+            setStarted(true);
+          }}
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none',
             background: 'rgba(8,12,18,0.92)', color: '#fff', fontSize: 18, fontWeight: 600,

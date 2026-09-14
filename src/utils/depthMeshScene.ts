@@ -126,6 +126,16 @@ export class DepthMeshScene {
     onVidErr('matte', this.matteVideo);
     if (this.bgVideo) onVidErr('bg_clean', this.bgVideo);
 
+    // Log when videos actually start playing or pause
+    const onVidPlay = (label: string, v: HTMLVideoElement) => {
+      v.addEventListener('playing', () => this.status(`▶ ${label} playing`), { once: true });
+      v.addEventListener('pause', () => this.status(`⏸ ${label} paused`));
+    };
+    onVidPlay('RGB', this.fgVideo);
+    onVidPlay('depth', this.depthVideo);
+    onVidPlay('matte', this.matteVideo);
+    if (this.bgVideo) onVidPlay('bg_clean', this.bgVideo);
+
     this.fgTexture = new THREE.VideoTexture(this.fgVideo);
     this.fgTexture.colorSpace = THREE.SRGBColorSpace;
     this.fgTexture.minFilter = THREE.LinearFilter;
@@ -335,8 +345,10 @@ export class DepthMeshScene {
         this.matteVideo.play(),
         this.bgVideo?.play(),
       ]);
-    } catch {
-      /* autoplay restrictions — user gesture needed */
+      this.status('▶ all videos playing');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.status(`⚠ video play() rejected: ${msg}`);
     }
   }
 
