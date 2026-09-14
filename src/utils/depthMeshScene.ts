@@ -86,6 +86,14 @@ export class DepthMeshScene {
     this.renderer.setClearColor(0x1a1a1a, 1);
     container.appendChild(this.renderer.domElement);
 
+    // Capture WebGL context loss (phones kill contexts under memory pressure)
+    this.renderer.domElement.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      this.running = false;
+      this.status('⚠ WebGL context lost — GPU memory pressure or too many streams');
+      this.onStats?.({ phase: 'context-lost', detail: 'webglcontextlost', streamsReady: this.streamsReady, streamsTotal: this.streamsTotal, bgLabel: this.bgLabel, bgBytes: this.bgBytes, elapsedMs: performance.now() - this.loadStartedMs });
+    }, false);
+
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x1a1a1a);
     this.camera = new THREE.PerspectiveCamera(50, w / h, 0.05, 1000);
@@ -98,6 +106,25 @@ export class DepthMeshScene {
     this.depthVideo = makeVideoEl(depthSrc);
     this.matteVideo = makeVideoEl(matteSrc);
     if (bgSrc) this.bgVideo = makeVideoEl(bgSrc);
+
+    // Log video errors (decode failures, 404s, format issues)
+    const onVidErr = (label: string, v: HTMLVideoElement) => {
+      v.addEventListener('error', () => {
+        const code = v.error?.code;
+        const msg = v.error?.message ?? '';
+        this.status(`⚠ ${label} video error: code=${code} ${msg}`);
+      }, false);
+      v.addEventListener('stalled', () => {
+        this.status(`⚠ ${label} video stalled (network slow?)`);
+      }, false);
+      v.addEventListener('abort', () => {
+        this.status(`⚠ ${label} video aborted`);
+      }, false);
+    };
+    onVidErr('RGB', this.fgVideo);
+    onVidErr('depth', this.depthVideo);
+    onVidErr('matte', this.matteVideo);
+    if (this.bgVideo) onVidErr('bg_clean', this.bgVideo);
 
     this.fgTexture = new THREE.VideoTexture(this.fgVideo);
     this.fgTexture.colorSpace = THREE.SRGBColorSpace;

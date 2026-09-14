@@ -37,6 +37,26 @@ export default function MobileDemo() {
   const [alphaCut, setAlphaCut] = useState(0.35);
   const [started, setStarted] = useState(false);
   const [sheet, setSheet] = useState<Sheet>('none');
+  const [logs, setLogs] = useState<string[]>([]);
+
+  // Collect status messages into a ring buffer for the on-screen log panel
+  const pushLog = useCallback((msg: string) => {
+    const ts = new Date().toLocaleTimeString();
+    setLogs((prev) => [...prev.slice(-40), `${ts} ${msg}`]);
+  }, []);
+
+  // Global error capture — catches uncaught exceptions and unhandled promise rejections
+  useEffect(() => {
+    const onErr = (e: ErrorEvent) => pushLog(`❌ ${e.message} @ ${e.filename}:${e.lineno}`);
+    const onRej = (e: PromiseRejectionEvent) =>
+      pushLog(`❌ promise rejected: ${String(e.reason)}`);
+    window.addEventListener('error', onErr);
+    window.addEventListener('unhandledrejection', onRej);
+    return () => {
+      window.removeEventListener('error', onErr);
+      window.removeEventListener('unhandledrejection', onRej);
+    };
+  }, [pushLog]);
 
   useEffect(() => {
     const meta = document.querySelector('meta[name="viewport"]') as HTMLMetaElement | null;
@@ -64,7 +84,7 @@ export default function MobileDemo() {
         /* fall back */
       }
       if (cancelled) return;
-      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, bg, MOBILE_CAL, setStatus, setStats, 360, 640);
+      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, bg, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640);
       sceneRef.current = scene;
       scene.start();
     })();
@@ -240,6 +260,33 @@ export default function MobileDemo() {
           </div>
           <p style={{ margin: '10px 0 0', color: '#8fa3b8', fontSize: 12 }}>{poseLabel}</p>
         </BottomSheet>
+      )}
+
+      {/* On-screen log overlay — always visible, shows last 6 log lines */}
+      {started && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 8,
+            bottom: 'calc(env(safe-area-inset-bottom, 12px) + 190px)',
+            maxWidth: '55vw',
+            maxHeight: 140,
+            overflow: 'hidden',
+            fontSize: 9,
+            lineHeight: 1.3,
+            color: '#ffcc66',
+            background: 'rgba(0,0,0,0.7)',
+            padding: '4px 6px',
+            borderRadius: 6,
+            zIndex: 8,
+            fontFamily: 'ui-monospace, monospace',
+            pointerEvents: 'none',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
+          }}
+        >
+          {logs.slice(-6).join('\n')}
+        </div>
       )}
     </div>
   );
