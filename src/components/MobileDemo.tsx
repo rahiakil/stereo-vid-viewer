@@ -33,7 +33,7 @@ export default function MobileDemo() {
   const [playing, setPlaying] = useState(true);
   const [ready, setReady] = useState(false);
   const [stats, setStats] = useState<DepthMeshStats | null>(null);
-  const [relief, setRelief] = useState(0.02);
+  const [relief, setRelief] = useState(0.005);
   const [alphaCut, setAlphaCut] = useState(0.35);
   const [started, setStarted] = useState(false);
   const [sheet, setSheet] = useState<Sheet>('none');
@@ -76,7 +76,7 @@ export default function MobileDemo() {
     // Create scene synchronously (no await) so video.play() stays within the user gesture.
     const mount = mountRef.current;
     if (!mount) return;
-      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.35, 4);
+      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.85, 4);
     sceneRef.current = scene;
     scene.start();
     const onResize = () => sceneRef.current?.resize();
@@ -229,8 +229,8 @@ export default function MobileDemo() {
             {playing ? 'Pause' : 'Play'}
           </button>
           <label style={sliderLabel}>
-            Pop-out {relief.toFixed(2)}
-            <input type="range" min={0} max={0.12} step={0.005} value={relief}
+            Pop-out {relief.toFixed(3)}
+            <input type="range" min={0} max={0.05} step={0.002} value={relief}
               onChange={(e) => { setRelief(+e.target.value); sceneRef.current?.setRelief(+e.target.value); }}
               style={{ width: '100%' }} />
           </label>
