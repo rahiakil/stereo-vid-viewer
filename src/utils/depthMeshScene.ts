@@ -71,6 +71,8 @@ export class DepthMeshScene {
     onStats?: (s: DepthMeshStats) => void,
     private gridCols = 200,
     private gridRows = 320,
+    private contentScale = 0.98,
+    private depthBlur = 0,
   ) {
     this.status = onStatus ?? (() => undefined);
     this.onStats = onStats ?? null;
@@ -169,6 +171,7 @@ export class DepthMeshScene {
         alphaCut: { value: this.alphaCut },
         cameraZ: { value: 0.25 },
         nearPlane: { value: 0.05 },
+        depthBlur: { value: this.depthBlur },
       },
       vertexShader: FG_VERT,
       fragmentShader: FG_FRAG,
@@ -260,11 +263,12 @@ export class DepthMeshScene {
   }
 
   private contentSize(aspect: number) {
+    const s = this.contentScale;
     const screenAspect = this.screenW / this.screenH;
     if (aspect > screenAspect) {
-      return { contentW: this.screenW * 0.98, contentH: (this.screenW * 0.98) / aspect };
+      return { contentW: this.screenW * s, contentH: (this.screenW * s) / aspect };
     }
-    return { contentH: this.screenH * 0.98, contentW: this.screenH * 0.98 * aspect };
+    return { contentH: this.screenH * s, contentW: this.screenH * s * aspect };
   }
 
   private createWireframeRoom() {
@@ -451,11 +455,24 @@ const FG_VERT = /* glsl */ `
   uniform float relief;
   uniform float cameraZ;
   uniform float nearPlane;
+  uniform float depthBlur;
   varying vec2 vUv;
   varying float vDepth;
   void main() {
     vUv = uv;
-    float d = texture2D(depthMap, uv).r;
+    float d;
+    if (depthBlur > 0.0) {
+      // 3x3 box blur to smooth per-pixel depth noise (kills mesh wobble)
+      vec2 ts = vec2(depthBlur) / vec2(textureSize(depthMap, 0));
+      float c = texture2D(depthMap, uv).r;
+      float l = texture2D(depthMap, uv + vec2(-ts.x, 0.0)).r;
+      float r = texture2D(depthMap, uv + vec2(ts.x, 0.0)).r;
+      float u = texture2D(depthMap, uv + vec2(0.0, ts.y)).r;
+      float dn = texture2D(depthMap, uv + vec2(0.0, -ts.y)).r;
+      d = (c + l + r + u + dn) / 5.0;
+    } else {
+      d = texture2D(depthMap, uv).r;
+    }
     vDepth = d;
     vec3 pos = position;
     // Bright = near → toward camera (+Z).

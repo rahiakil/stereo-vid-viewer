@@ -76,7 +76,7 @@ export default function MobileDemo() {
     // Create scene synchronously (no await) so video.play() stays within the user gesture.
     const mount = mountRef.current;
     if (!mount) return;
-    scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640);
+      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.72, 3);
     sceneRef.current = scene;
     scene.start();
     const onResize = () => sceneRef.current?.resize();
