@@ -167,6 +167,8 @@ export class DepthMeshScene {
         matteMap: { value: this.matteTexture },
         relief: { value: this.relief },
         alphaCut: { value: this.alphaCut },
+        cameraZ: { value: 0.25 },
+        nearPlane: { value: 0.05 },
       },
       vertexShader: FG_VERT,
       fragmentShader: FG_FRAG,
@@ -390,6 +392,8 @@ export class DepthMeshScene {
 
     const eye = this.offAxis.headPoseToWorld(this.pose, 0);
     this.offAxis.applyToCamera(this.camera, eye);
+    // Update the shader's camera distance so vertex displacement can be clamped
+    this.fgMat.uniforms.cameraZ.value = eye.z;
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -443,6 +447,8 @@ function makeVideoEl(src: string): HTMLVideoElement {
 const FG_VERT = /* glsl */ `
   uniform sampler2D depthMap;
   uniform float relief;
+  uniform float cameraZ;
+  uniform float nearPlane;
   varying vec2 vUv;
   varying float vDepth;
   void main() {
@@ -450,8 +456,10 @@ const FG_VERT = /* glsl */ `
     float d = texture2D(depthMap, uv).r;
     vDepth = d;
     vec3 pos = position;
-    // Bright = near → toward camera (+Z)
-    pos.z += d * relief;
+    // Bright = near → toward camera (+Z).
+    // Clamp so the vertex never passes the near plane (would be clipped → scene vanishes).
+    float maxDisp = cameraZ - nearPlane - 0.01;
+    pos.z += min(d * relief, maxDisp);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
 `;

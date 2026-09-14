@@ -33,7 +33,7 @@ export default function MobileDemo() {
   const [playing, setPlaying] = useState(true);
   const [ready, setReady] = useState(false);
   const [stats, setStats] = useState<DepthMeshStats | null>(null);
-  const [relief, setRelief] = useState(0.14);
+  const [relief, setRelief] = useState(0.04);
   const [alphaCut, setAlphaCut] = useState(0.35);
   const [started, setStarted] = useState(false);
   const [sheet, setSheet] = useState<Sheet>('none');
@@ -207,7 +207,7 @@ export default function MobileDemo() {
           </button>
           <label style={sliderLabel}>
             Pop-out {relief.toFixed(2)}
-            <input type="range" min={0} max={0.3} step={0.01} value={relief}
+            <input type="range" min={0} max={0.12} step={0.005} value={relief}
               onChange={(e) => { setRelief(+e.target.value); sceneRef.current?.setRelief(+e.target.value); }}
               style={{ width: '100%' }} />
           </label>
