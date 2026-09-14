@@ -42,10 +42,16 @@ export class OffAxisCamera {
   /** Map normalized face pose → world eye position (screen at z=0) */
   headPoseToWorld(pose: HeadPose, eyeOffsetX = 0): WorldEye {
     const ms = this.movementScale;
-    const x = -(pose.x - 0.5) * this.screenW * ms + eyeOffsetX;
-    const y = -(pose.y - 0.5) * this.screenH * ms;
+    // Clamp pose so the eye can never wander beyond ±40% of the screen half-extent.
+    // This prevents the scene from sliding off-screen on phones where the face
+    // detection is noisy or the face isn't centered in the front camera.
+    const cx = Math.max(-0.4, Math.min(0.4, pose.x - 0.5));
+    const cy = Math.max(-0.4, Math.min(0.4, pose.y - 0.5));
+    const cz = Math.max(0.6, Math.min(1.8, pose.z));
+    const x = -cx * this.screenW * ms + eyeOffsetX;
+    const y = -cy * this.screenH * ms;
     const base = this.viewingDistanceCm * WORLD_SCALE;
-    const z = base / Math.max(0.4, pose.z);
+    const z = base / Math.max(0.4, cz);
     return { x, y, z };
   }
 

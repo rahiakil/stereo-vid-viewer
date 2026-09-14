@@ -16,16 +16,19 @@ declare global {
 
 interface Props {
   onHeadPose: (pose: HeadPose | null) => void;
+  smoothingFactor?: number;
+  autoCalibrate?: boolean;
 }
 
-const FaceTracker: React.FC<Props> = ({ onHeadPose }) => {
+const FaceTracker: React.FC<Props> = ({ onHeadPose, smoothingFactor = 0.3, autoCalibrate = false }) => {
   const webcamRef = useRef<Webcam | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const tracker = useRef(new HeadPoseTracker(0.3));
+  const tracker = useRef(new HeadPoseTracker(smoothingFactor));
   const cameraRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tracking, setTracking] = useState(false);
+  const calibStarted = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,6 +88,10 @@ const FaceTracker: React.FC<Props> = ({ onHeadPose }) => {
             z: p.z,
           }));
           const pose = tracker.current.updateFromLandmarks(mirrored);
+          if (autoCalibrate && !calibStarted.current && pose) {
+            calibStarted.current = true;
+            tracker.current.startCalibration(20);
+          }
           onHeadPose(pose);
           setTracking(true);
         } else {

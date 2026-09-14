@@ -140,6 +140,29 @@ export default function MobileDemo() {
         </div>
       )}
 
+      {/* Debug readout — top-left, shows raw pose so we can diagnose jumps */}
+      {started && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(env(safe-area-inset-top, 8px) + 28px)',
+            left: 8,
+            fontSize: 10,
+            color: '#3ecf8e',
+            background: 'rgba(0,0,0,0.6)',
+            padding: '4px 8px',
+            borderRadius: 6,
+            zIndex: 8,
+            fontFamily: 'ui-monospace, monospace',
+            pointerEvents: 'none',
+            maxWidth: '60vw',
+            lineHeight: 1.4,
+          }}
+        >
+          {poseLabel}
+        </div>
+      )}
+
       {started && (
         <div style={{
           position: 'absolute', right: 12,
@@ -213,7 +236,7 @@ export default function MobileDemo() {
       {started && (
         <BottomSheet open={sheet === 'camera'} onClose={() => setSheet('none')} title="Face tracker">
           <div style={{ width: '100%', aspectRatio: '4 / 3', borderRadius: 10, overflow: 'hidden', border: '2px solid #2a3848', background: '#000' }}>
-            <FaceTracker onHeadPose={onHeadPose} />
+            <FaceTracker onHeadPose={onHeadPose} smoothingFactor={0.15} autoCalibrate />
           </div>
           <p style={{ margin: '10px 0 0', color: '#8fa3b8', fontSize: 12 }}>{poseLabel}</p>
         </BottomSheet>
