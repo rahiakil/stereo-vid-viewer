@@ -9,12 +9,7 @@ import { DepthMeshScene, DepthMeshStats } from '../utils/depthMeshScene';
  * Phone calibration + tap-to-start + bottom sheets + 100dvh.
  */
 
-const MOBILE_CAL = {
-  screenWidthCm: 7,
-  screenHeightCm: 14,
-  viewingDistanceCm: 45,
-  movementScale: 0.3,
-};
+// Calibration is computed dynamically from the actual viewport aspect ratio (see useEffect).
 
 const BASE = import.meta.env.BASE_URL;
 const FG_VIDEO = `${BASE}media/demo/mobile/rgb.mp4`;
@@ -71,12 +66,18 @@ export default function MobileDemo() {
 
   useEffect(() => {
     if (!started || !mountRef.current) return;
-    let cancelled = false;
     let scene: DepthMeshScene | null = null;
     // Create scene synchronously (no await) so video.play() stays within the user gesture.
     const mount = mountRef.current;
     if (!mount) return;
-      scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, MOBILE_CAL, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.85, 4);
+    // Compute screen dimensions from actual viewport aspect so the frustum matches the phone.
+    const w = mount.clientWidth || window.innerWidth;
+    const h = mount.clientHeight || window.innerHeight;
+    const aspect = w / h;
+    const screenWidthCm = 7;
+    const screenHeightCm = screenWidthCm / aspect;
+    const cal = { screenWidthCm, screenHeightCm, viewingDistanceCm: 45, movementScale: 0.3 };
+    scene = new DepthMeshScene(mount, FG_VIDEO, DEPTH_VIDEO, MATTE_VIDEO, BG_VIDEO, cal, (s) => { setStatus(s); pushLog(s); }, setStats, 360, 640, 0.85, 4);
     sceneRef.current = scene;
     scene.start();
     const onResize = () => sceneRef.current?.resize();
@@ -279,12 +280,22 @@ export default function MobileDemo() {
       )}
 
       {started && (
-        <BottomSheet open={sheet === 'camera'} onClose={() => setSheet('none')} title="Face tracker">
-          <div style={{ width: '100%', aspectRatio: '4 / 3', borderRadius: 10, overflow: 'hidden', border: '2px solid #2a3848', background: '#000' }}>
-            <FaceTracker onHeadPose={onHeadPose} smoothingFactor={0.08} autoCalibrate />
-          </div>
-          <p style={{ margin: '10px 0 0', color: '#8fa3b8', fontSize: 12 }}>{poseLabel}</p>
-        </BottomSheet>
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(env(safe-area-inset-top, 8px) + 32px)',
+            right: 8,
+            width: 80,
+            height: 60,
+            borderRadius: 8,
+            overflow: 'hidden',
+            border: '2px solid #2a3848',
+            background: '#000',
+            zIndex: 10,
+          }}
+        >
+          <FaceTracker onHeadPose={onHeadPose} smoothingFactor={0.08} autoCalibrate />
+        </div>
       )}
 
       {/* On-screen log overlay — always visible, shows last 6 log lines */}
