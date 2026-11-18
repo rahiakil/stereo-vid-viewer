@@ -34,10 +34,14 @@ export default function App() {
   const [depthStatus, setDepthStatus] = useState('checking depth…');
 
   const [isStereoSBS, setIsStereoSBS] = useState(false);
+  const [portalVideo, setPortalVideo] = useState<'labubu' | 'custom'>('labubu');
 
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;
-    const scene = new StereoVideoScene(mountRef.current, DEFAULT_VIDEO, DEFAULT_CAL, null);
+    const videoUrl = portalVideo === 'labubu' ? DEFAULT_VIDEO : `${import.meta.env.BASE_URL}media/custom_stereo.mp4`;
+    const depthUrl = portalVideo === 'labubu' ? DEFAULT_DEPTH : `${import.meta.env.BASE_URL}media/custom_depth.mp4`;
+
+    const scene = new StereoVideoScene(mountRef.current, videoUrl, DEFAULT_CAL, null);
     sceneRef.current = scene;
     scene.setMode(mode);
     scene.setIsStereoSBS(isStereoSBS);
@@ -46,7 +50,7 @@ export default function App() {
     scene.start();
     void scene.play().then(() => setPlaying(!scene.isPaused()));
     void (async () => {
-      const ok = await scene.loadDepthVideo(DEFAULT_DEPTH);
+      const ok = await scene.loadDepthVideo(depthUrl);
       setDepthStatus(ok ? 'depth loaded' : 'no depth');
     })();
     const onResize = () => scene.resize();
@@ -57,7 +61,7 @@ export default function App() {
       sceneRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appMode]);
+  }, [appMode, portalVideo]);
 
   useEffect(() => {
     sceneRef.current?.setIsStereoSBS(isStereoSBS);
@@ -268,6 +272,23 @@ export default function App() {
                 />
                 Input video is Side-by-Side (Stereo)
               </label>
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 8, fontSize: 11, color: '#8fa3b8', alignItems: 'center' }}>
+              <span>Source:</span>
+              <button
+                type="button"
+                onClick={() => { setPortalVideo('labubu'); setIsStereoSBS(false); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'labubu' ? '#5b9fd4' : '#1c2836' }}
+              >
+                Labubu
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPortalVideo('custom'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'custom' ? '#5b9fd4' : '#1c2836' }}
+              >
+                My SBS
+              </button>
             </div>
             <label style={{ display: 'block', marginBottom: 6 }}>
               Cut {fgThreshold.toFixed(2)}

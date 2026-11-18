@@ -40,28 +40,35 @@ export default function SneakerDemo() {
   const [showInspector, setShowInspector] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom'>('labubu');
 
   useEffect(() => {
     if (!mountRef.current) return;
     let cancelled = false;
     let scene: DepthMeshScene | null = null;
 
+    const fg = selectedVideo === 'labubu' ? FG_VIDEO : `${BASE}media/custom_rgb.mp4`;
+    const depth = selectedVideo === 'labubu' ? DEPTH_VIDEO : `${BASE}media/custom_depth.mp4`;
+    const matte = selectedVideo === 'labubu' ? MATTE_VIDEO : `${BASE}media/custom_matte.mp4`;
+    const bg_default = fg;
+    const bg_target = selectedVideo === 'labubu' ? BG_VIDEO : fg;
+
     void (async () => {
       const mount = mountRef.current;
       if (!mount) return;
-      let bg = BG_VIDEO_FALLBACK;
+      let bg = bg_default;
       try {
-        const head = await fetch(BG_VIDEO, { method: 'HEAD' });
-        if (head.ok) bg = BG_VIDEO;
+        const head = await fetch(bg_target, { method: 'HEAD' });
+        if (head.ok) bg = bg_target;
       } catch {
         /* fall back to original */
       }
       if (cancelled) return;
       scene = new DepthMeshScene(
         mount,
-        FG_VIDEO,
-        DEPTH_VIDEO,
-        MATTE_VIDEO,
+        fg,
+        depth,
+        matte,
         bg,
         DEFAULT_CAL,
         setStatus,
@@ -79,7 +86,7 @@ export default function SneakerDemo() {
       scene?.dispose();
       sceneRef.current = null;
     };
-  }, []);
+  }, [selectedVideo]);
 
   useEffect(() => {
     if (stats && stats.streamsReady >= stats.streamsTotal && !ready) {
@@ -209,6 +216,23 @@ export default function SneakerDemo() {
           <button type="button" onClick={togglePlay} disabled={!ready} style={btnStyle(ready)}>
             {playing ? <Pause size={14} /> : <Play size={14} />}
             {playing ? 'Pause' : 'Play'}
+          </button>
+        </div>
+        <div style={{ color: '#8fa3b8', fontSize: 10, marginBottom: 4 }}>SELECT SOURCE VIDEO</div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+          <button
+            type="button"
+            onClick={() => setSelectedVideo('labubu')}
+            style={btnStyle(selectedVideo === 'labubu')}
+          >
+            Labubu (Default)
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedVideo('custom')}
+            style={btnStyle(selectedVideo === 'custom')}
+          >
+            My Custom Video
           </button>
         </div>
         <label style={sliderLabel}>
