@@ -33,11 +33,14 @@ export default function App() {
   const [videoLabel, setVideoLabel] = useState('vid-labu1.mp4');
   const [depthStatus, setDepthStatus] = useState('checking depth…');
 
+  const [isStereoSBS, setIsStereoSBS] = useState(false);
+
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;
     const scene = new StereoVideoScene(mountRef.current, DEFAULT_VIDEO, DEFAULT_CAL, null);
     sceneRef.current = scene;
     scene.setMode(mode);
+    scene.setIsStereoSBS(isStereoSBS);
     scene.setRelief(relief);
     scene.setFgThreshold(fgThreshold);
     scene.start();
@@ -55,6 +58,10 @@ export default function App() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appMode]);
+
+  useEffect(() => {
+    sceneRef.current?.setIsStereoSBS(isStereoSBS);
+  }, [isStereoSBS]);
 
   useEffect(() => {
     sceneRef.current?.setMode(mode);
@@ -249,6 +256,17 @@ export default function App() {
               <label style={{ ...btnStyle, cursor: 'pointer' }}>
                 <Upload size={14} />
                 <input type="file" accept="video/*" onChange={onUpload} style={{ display: 'none' }} />
+              </label>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer', color: '#fff' }}>
+                <input
+                  type="checkbox"
+                  checked={isStereoSBS}
+                  onChange={(e) => setIsStereoSBS(e.target.checked)}
+                  style={{ cursor: 'pointer' }}
+                />
+                Input video is Side-by-Side (Stereo)
               </label>
             </div>
             <label style={{ display: 'block', marginBottom: 6 }}>

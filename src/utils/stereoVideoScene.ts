@@ -39,11 +39,17 @@ const BG_FRAG = /* glsl */ `
   uniform sampler2D depthMap;
   uniform float useDepth;
   uniform float fgThreshold;
+  uniform float isStereoSBS;
+  uniform float eye;
   varying vec2 vUv;
   void main() {
-    vec4 color = texture2D(map, vUv);
+    vec2 uv = vUv;
+    if (isStereoSBS > 0.5) {
+      uv.x = uv.x * 0.5 + (eye * 0.5);
+    }
+    vec4 color = texture2D(map, uv);
     // Optional: slightly dim regions that are covered by FG (near)
-    float d = texture2D(depthMap, vUv).r;
+    float d = texture2D(depthMap, uv).r;
     float near = useDepth * smoothstep(fgThreshold - 0.05, fgThreshold + 0.05, d);
     color.rgb *= mix(1.0, 0.85, near);
     gl_FragColor = color;
@@ -72,11 +78,17 @@ const FG_VERT = /* glsl */ `
 
 const FG_FRAG = /* glsl */ `
   uniform sampler2D map;
+  uniform float isStereoSBS;
+  uniform float eye;
   varying vec2 vUv;
   varying float vMask;
   void main() {
     if (vMask < 0.02) discard;
-    vec4 color = texture2D(map, vUv);
+    vec2 uv = vUv;
+    if (isStereoSBS > 0.5) {
+      uv.x = uv.x * 0.5 + (eye * 0.5);
+    }
+    vec4 color = texture2D(map, uv);
     color.a *= vMask;
     gl_FragColor = color;
   }
@@ -103,6 +115,7 @@ export class StereoVideoScene {
   private running = false;
   private pose: HeadPose = { x: 0.5, y: 0.5, z: 1 };
   private mode: StereoMode = 'window';
+  private isStereoSBS = 0;
   private ipdCm = 6.5;
   private relief = 0.12; // pop-out distance in meters (toward eye)
   private useDepth = 0;
@@ -161,6 +174,8 @@ export class StereoVideoScene {
         depthMap: { value: this.depthTexture },
         useDepth: { value: 0 },
         fgThreshold: { value: this.fgThreshold },
+        isStereoSBS: { value: 0 },
+        eye: { value: 0 },
       },
       vertexShader: BG_VERT,
       fragmentShader: BG_FRAG,
@@ -183,6 +198,8 @@ export class StereoVideoScene {
         relief: { value: this.relief },
         fgThreshold: { value: this.fgThreshold },
         fgSoftness: { value: this.fgSoftness },
+        isStereoSBS: { value: 0 },
+        eye: { value: 0 },
       },
       vertexShader: FG_VERT,
       fragmentShader: FG_FRAG,
@@ -361,6 +378,16 @@ export class StereoVideoScene {
     this.mode = mode;
   }
 
+  setIsStereoSBS(val: boolean) {
+    this.isStereoSBS = val ? 1 : 0;
+    if (this.bgMat && this.bgMat.uniforms.isStereoSBS) {
+      this.bgMat.uniforms.isStereoSBS.value = this.isStereoSBS;
+    }
+    if (this.fgMat && this.fgMat.uniforms.isStereoSBS) {
+      this.fgMat.uniforms.isStereoSBS.value = this.isStereoSBS;
+    }
+  }
+
   setHeadPose(pose: HeadPose | null) {
     if (pose) this.pose = pose;
   }
@@ -440,6 +467,8 @@ export class StereoVideoScene {
     this.renderer.clear();
 
     if (this.mode === 'window') {
+      this.bgMat.uniforms.eye.value = 0.0;
+      this.fgMat.uniforms.eye.value = 0.0;
       this.offAxis.applyToCamera(this.cameraL, eyeC);
       this.renderer.setViewport(0, 0, w, h);
       this.renderer.setScissorTest(false);
@@ -451,12 +480,21 @@ export class StereoVideoScene {
       this.offAxis.applyToCamera(this.cameraL, eyeL);
       this.offAxis.applyToCamera(this.cameraR, eyeR);
       this.renderer.setScissorTest(true);
+
+      // Left eye
+      this.bgMat.uniforms.eye.value = 0.0;
+      this.fgMat.uniforms.eye.value = 0.0;
       this.renderer.setViewport(0, 0, w / 2, h);
       this.renderer.setScissor(0, 0, w / 2, h);
       this.renderer.render(this.scene, this.cameraL);
+
+      // Right eye
+      this.bgMat.uniforms.eye.value = 1.0;
+      this.fgMat.uniforms.eye.value = 1.0;
       this.renderer.setViewport(w / 2, 0, w / 2, h);
       this.renderer.setScissor(w / 2, 0, w / 2, h);
       this.renderer.render(this.scene, this.cameraR);
+
       this.renderer.setScissorTest(false);
       return;
     }
@@ -466,9 +504,17 @@ export class StereoVideoScene {
     }
     this.offAxis.applyToCamera(this.cameraL, eyeL);
     this.offAxis.applyToCamera(this.cameraR, eyeR);
+    
+    // Left eye render
+    this.bgMat.uniforms.eye.value = 0.0;
+    this.fgMat.uniforms.eye.value = 0.0;
     this.renderer.setRenderTarget(this.rtL);
     this.renderer.clear();
     this.renderer.render(this.scene, this.cameraL);
+    
+    // Right eye render
+    this.bgMat.uniforms.eye.value = 1.0;
+    this.fgMat.uniforms.eye.value = 1.0;
     this.renderer.setRenderTarget(this.rtR);
     this.renderer.clear();
     this.renderer.render(this.scene, this.cameraR);
