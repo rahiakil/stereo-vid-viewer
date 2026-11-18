@@ -30,11 +30,11 @@ export default function App() {
   const [relief, setRelief] = useState(0.14);
   const [fgThreshold, setFgThreshold] = useState(0.55);
   const [poseLabel, setPoseLabel] = useState('—');
-  const [videoLabel, setVideoLabel] = useState('vid-labu1.mp4');
+  const [videoLabel, setVideoLabel] = useState('custom_stereo.mp4');
   const [depthStatus, setDepthStatus] = useState('checking depth…');
 
-  const [isStereoSBS, setIsStereoSBS] = useState(false);
-  const [portalVideo, setPortalVideo] = useState<'labubu' | 'custom'>('labubu');
+  const [isStereoSBS, setIsStereoSBS] = useState(true);
+  const [portalVideo, setPortalVideo] = useState<'labubu' | 'custom'>('custom');
 
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;

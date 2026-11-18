@@ -38,9 +38,9 @@ export default function SneakerDemo() {
 
   // Panel visibility — collapsed by default on small screens
   const [showInspector, setShowInspector] = useState(false);
-  const [showControls, setShowControls] = useState(false);
+  const [showControls, setShowControls] = useState(true);
   const [showCamera, setShowCamera] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom'>('labubu');
+  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom'>('custom');
 
   useEffect(() => {
     if (!mountRef.current) return;
