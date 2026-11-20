@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pause, Play, ChevronLeft, ChevronRight, Activity, Sliders, Video } from 'lucide-react';
+import { Pause, Play, ChevronLeft, ChevronRight, Activity, Sliders, Video, AlertCircle } from 'lucide-react';
 import FaceTracker from './FaceTracker';
 import { HeadPose } from '../utils/headPose';
 import { DepthMeshScene, DepthMeshStats } from '../utils/depthMeshScene';
@@ -324,15 +324,25 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
           })}
         </div>
         <div style={{ marginBottom: 12 }}>
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer', color: '#fff' }}>
-            <input
-              type="checkbox"
-              checked={useMatte}
-              onChange={(e) => setUseMatte(e.target.checked)}
-              style={{ cursor: 'pointer' }}
-            />
-            Use Foreground Matte Cutout
-          </label>
+          {selectedVideo !== 'fuarukee' ? (
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer', color: '#fff' }}>
+              <input
+                type="checkbox"
+                checked={useMatte}
+                onChange={(e) => {
+                  setUseMatte(e.target.checked);
+                  sceneRef.current?.setUseMatte(e.target.checked);
+                }}
+                style={{ cursor: 'pointer' }}
+              />
+              Use Foreground Matte Cutout
+            </label>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#8fa3b8', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '6px 10px', borderRadius: 6 }}>
+              <AlertCircle size={14} style={{ color: '#f59e0b' }} />
+              <span>Matte cutout unavailable for landscapes</span>
+            </div>
+          )}
         </div>
         <label style={sliderLabel}>
           Pop-out {relief.toFixed(2)}
