@@ -1,13 +1,13 @@
 {
   "system": {
-    "cpu_usage_pct": 88.6,
-    "memory_usage_pct": 39.8,
-    "avg_processing_time_sec": 80.8,
+    "cpu_usage_pct": 88.1,
+    "memory_usage_pct": 40.2,
+    "avg_processing_time_sec": 85.0,
     "total_processed": 6
   },
   "queue": [
     {
-      "name": "dancing_demo.mp4",
+      "name": "seal_demo.mp4",
       "status": "pending",
       "progress": 0
     }
@@ -17,12 +17,12 @@
       "id": "seal_demo",
       "title": "Seal Demo",
       "duration_sec": 10.0,
-      "processing_time_sec": 98.5,
-      "parallax_variance": 0.0,
-      "status": "failed",
+      "processing_time_sec": 123.5,
+      "parallax_variance": 4.51,
+      "status": "success",
       "left_screenshot": "media/dashboard/seal_demo_left.png",
       "right_screenshot": "media/dashboard/seal_demo_right.png",
-      "description": "Underwater seal swimming. Reconstructed into continuous, flowing autostereoscopic mesh. (Optimized Relief: 0.16)"
+      "description": "Underwater seal swimming. Reconstructed into continuous, flowing autostereoscopic mesh. (Optimized Relief: 0.08)"
     },
     {
       "id": "dancing_demo",
