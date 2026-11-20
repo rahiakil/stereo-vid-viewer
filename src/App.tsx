@@ -3,6 +3,7 @@ import { Maximize, Minimize, Play, Pause, Upload, Smartphone } from 'lucide-reac
 import FaceTracker from './components/FaceTracker';
 import MultiViewPlayer from './components/MultiViewPlayer';
 import SneakerDemo from './components/SneakerDemo';
+import HarnessDashboard from './components/HarnessDashboard';
 import { HeadPose } from './utils/headPose';
 import { StereoVideoScene, StereoMode } from './utils/stereoVideoScene';
 
@@ -17,7 +18,7 @@ const DEFAULT_CAL = {
   viewingDistanceCm: 60,
 };
 
-type AppMode = 'sneaker' | 'explain' | 'multiview' | 'portal';
+type AppMode = 'sneaker' | 'explain' | 'multiview' | 'portal' | 'harness';
 
 export default function App() {
   const [appMode, setAppMode] = useState<AppMode>('sneaker');
@@ -34,7 +35,8 @@ export default function App() {
   const [depthStatus, setDepthStatus] = useState('checking depth…');
 
   const [isStereoSBS, setIsStereoSBS] = useState(true);
-  const [portalVideo, setPortalVideo] = useState<'labubu' | 'custom' | 'fuarukee'>('fuarukee');
+  const [portalVideo, setPortalVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | string>('fuarukee');
+  const [currentVideoToPlay, setCurrentVideoToPlay] = useState<string>('fuarukee');
 
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;
@@ -44,7 +46,7 @@ export default function App() {
     if (portalVideo === 'custom') {
       videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4`;
-    } else if (portalVideo === 'office_demo') {
+    } else if (portalVideo === 'fuarukee') {
       videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4`;
     } else if (portalVideo === 'office_demo') {
@@ -161,6 +163,7 @@ export default function App() {
           {(
             [
               ['sneaker', 'Sneaker demo'],
+              ['harness', 'Harness Dashboard'],
               ['explain', 'What sneaker does'],
               ['multiview', 'Extra viewpoints'],
               ['portal', 'Portal (old)'],
@@ -200,7 +203,23 @@ export default function App() {
 
       {appMode === 'sneaker' && (
         <div style={{ flex: 1, minHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
-          <SneakerDemo />
+          <SneakerDemo defaultVideo={currentVideoToPlay} />
+        </div>
+      )}
+
+      {appMode === 'harness' && (
+        <div style={{ flex: 1, minHeight: '70vh' }}>
+          <HarnessDashboard 
+            onPlayVideo={(id, view) => {
+              setCurrentVideoToPlay(id);
+              if (view === 'mesh') {
+                setAppMode('sneaker');
+              } else if (view === 'portal') {
+                setPortalVideo(id);
+                setAppMode('portal');
+              }
+            }}
+          />
         </div>
       )}
 

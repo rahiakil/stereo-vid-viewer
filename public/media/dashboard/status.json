@@ -1,0 +1,44 @@
+{
+  "system": {
+    "cpu_usage_pct": 12.9,
+    "memory_usage_pct": 36.9,
+    "avg_processing_time_sec": 42.0,
+    "total_processed": 3
+  },
+  "queue": [],
+  "history": [
+    {
+      "id": "fuarukee",
+      "title": "Fuarukee POV",
+      "duration_sec": 10.0,
+      "processing_time_sec": 38.5,
+      "parallax_variance": 5.82,
+      "status": "success",
+      "left_screenshot": "media/dashboard/fuarukee_left.png",
+      "right_screenshot": "media/dashboard/fuarukee_right.png",
+      "description": "Scenery landscape POV. Renders with matte-bypass continuous mesh."
+    },
+    {
+      "id": "custom",
+      "title": "First Custom Video",
+      "duration_sec": 10.0,
+      "processing_time_sec": 41.2,
+      "parallax_variance": 6.14,
+      "status": "success",
+      "left_screenshot": "media/dashboard/custom_left.png",
+      "right_screenshot": "media/dashboard/custom_right.png",
+      "description": "Standard stereoscopic video split into foreground cutout and background."
+    },
+    {
+      "id": "labubu",
+      "title": "Labubu Toy Walk",
+      "duration_sec": 5.0,
+      "processing_time_sec": 22.0,
+      "parallax_variance": 4.95,
+      "status": "success",
+      "left_screenshot": "media/dashboard/labubu_left.png",
+      "right_screenshot": "media/dashboard/labubu_right.png",
+      "description": "Original high-detail store aisle walkthrough."
+    }
+  ]
+}

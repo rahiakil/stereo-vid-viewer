@@ -24,8 +24,12 @@ function fmtMs(ms: number) {
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`;
 }
 
+interface SneakerDemoProps {
+  defaultVideo?: 'labubu' | 'custom' | 'fuarukee' | 'office_demo' | string;
+}
+
 /** Browser-assembled depth-mesh demo (no per-frame GLB warm). */
-export default function SneakerDemo() {
+export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<DepthMeshScene | null>(null);
   const [status, setStatus] = useState('Starting…');
@@ -40,7 +44,7 @@ export default function SneakerDemo() {
   const [showInspector, setShowInspector] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showCamera, setShowCamera] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo'>('fuarukee');
+  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | string>(defaultVideo || 'fuarukee');
   const [useMatte, setUseMatte] = useState(false);
 
   useEffect(() => {
@@ -260,7 +264,7 @@ export default function SneakerDemo() {
             {
               id: 'office_demo',
               title: 'Office Demo',
-              desc: 'Processed stereoscopic video 'office_demo'. Left eye view reconstructed into 3D mesh with empty in-painted background.',
+              desc: 'Processed stereoscopic video "office_demo". Left eye view reconstructed into 3D mesh with empty in-painted background.',
               badge: 'Auto Processed',
               badgeColor: '#a78bfa',
             },
