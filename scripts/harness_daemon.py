@@ -408,13 +408,6 @@ async def run_playwright_test(vid_id: str, meta: dict) -> dict:
     from playwright.async_api import async_playwright
     log(f"Launching simulated human-eye test for {vid_id}...")
 
-    # Start local Vite server
-    server_proc = subprocess.Popen(
-        ["npm", "run", "dev"], cwd=BASE_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    # Wait for Vite to boot
-    await asyncio.sleep(4)
-
     metrics = {"status": "success", "errors": [], "parallax_variance": 0.0}
 
     try:
@@ -429,8 +422,8 @@ async def run_playwright_test(vid_id: str, meta: dict) -> dict:
             # Record errors
             page.on("pageerror", lambda err: metrics["errors"].append(str(err)))
 
-            # Open local preview
-            await page.goto("https://localhost:5177/")
+            # Open local preview (Vite dev server runs permanently as systemd user service)
+            await page.goto("http://localhost:5177/")
             await asyncio.sleep(5)
 
             # Click on our new video card in the library
@@ -473,9 +466,6 @@ async def run_playwright_test(vid_id: str, meta: dict) -> dict:
         log(f"Playwright run crashed: {e}")
         metrics["status"] = "failed"
         metrics["errors"].append(str(e))
-    finally:
-        server_proc.terminate()
-        server_proc.wait()
 
     # Save history entry
     history_entry = {
