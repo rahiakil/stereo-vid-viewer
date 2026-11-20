@@ -41,6 +41,15 @@ export default function SneakerDemo() {
   const [showControls, setShowControls] = useState(true);
   const [showCamera, setShowCamera] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee'>('fuarukee');
+  const [useMatte, setUseMatte] = useState(false);
+
+  useEffect(() => {
+    setUseMatte(selectedVideo !== 'fuarukee');
+  }, [selectedVideo]);
+
+  useEffect(() => {
+    sceneRef.current?.setUseMatte(useMatte);
+  }, [useMatte]);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -87,6 +96,7 @@ export default function SneakerDemo() {
         setStats,
       );
       sceneRef.current = scene;
+      scene.setUseMatte(useMatte);
       scene.start();
     })();
 
@@ -287,6 +297,17 @@ export default function SneakerDemo() {
               </div>
             );
           })}
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer', color: '#fff' }}>
+            <input
+              type="checkbox"
+              checked={useMatte}
+              onChange={(e) => setUseMatte(e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            Use Foreground Matte Cutout
+          </label>
         </div>
         <label style={sliderLabel}>
           Pop-out {relief.toFixed(2)}

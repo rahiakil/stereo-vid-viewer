@@ -169,6 +169,7 @@ export class DepthMeshScene {
         matteMap: { value: this.matteTexture },
         relief: { value: this.relief },
         alphaCut: { value: this.alphaCut },
+        useMatte: { value: 1.0 },
         cameraZ: { value: 0.25 },
         nearPlane: { value: 0.05 },
         depthBlur: { value: this.depthBlur },
@@ -336,6 +337,10 @@ export class DepthMeshScene {
     this.fgMat.uniforms.alphaCut.value = a;
   }
 
+  setUseMatte(val: boolean) {
+    this.fgMat.uniforms.useMatte.value = val ? 1.0 : 0.0;
+  }
+
   togglePlay() {
     this.playing = !this.playing;
     this.syncPlay();
@@ -487,13 +492,16 @@ const FG_FRAG = /* glsl */ `
   uniform sampler2D map;
   uniform sampler2D matteMap;
   uniform float alphaCut;
+  uniform float useMatte;
   varying vec2 vUv;
   varying float vDepth;
   void main() {
-    float matte = texture2D(matteMap, vUv).r;
-    if (matte < alphaCut) discard;
     vec4 color = texture2D(map, vUv);
-    color.a = smoothstep(alphaCut - 0.08, alphaCut + 0.08, matte);
+    if (useMatte > 0.5) {
+      float matte = texture2D(matteMap, vUv).r;
+      if (matte < alphaCut) discard;
+      color.a = smoothstep(alphaCut - 0.08, alphaCut + 0.08, matte);
+    }
     gl_FragColor = color;
   }
 `;
