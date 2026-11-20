@@ -51,7 +51,7 @@ export default function SneakerDemo() {
     const depth = selectedVideo === 'labubu' ? DEPTH_VIDEO : `${BASE}media/custom_depth.mp4`;
     const matte = selectedVideo === 'labubu' ? MATTE_VIDEO : `${BASE}media/custom_matte.mp4`;
     const bg_default = fg;
-    const bg_target = selectedVideo === 'labubu' ? BG_VIDEO : fg;
+    const bg_target = selectedVideo === 'labubu' ? BG_VIDEO : `${BASE}media/custom_bg_clean.mp4`;
 
     void (async () => {
       const mount = mountRef.current;
@@ -218,22 +218,56 @@ export default function SneakerDemo() {
             {playing ? 'Pause' : 'Play'}
           </button>
         </div>
-        <div style={{ color: '#8fa3b8', fontSize: 10, marginBottom: 4 }}>SELECT SOURCE VIDEO</div>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-          <button
-            type="button"
-            onClick={() => setSelectedVideo('labubu')}
-            style={btnStyle(selectedVideo === 'labubu')}
-          >
-            Labubu (Default)
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedVideo('custom')}
-            style={btnStyle(selectedVideo === 'custom')}
-          >
-            My Custom Video
-          </button>
+        <div style={{ color: '#8fa3b8', fontSize: 10, marginBottom: 8 }}>PROCESSED VIDEO LIBRARY</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+          {[
+            {
+              id: 'custom',
+              title: 'My Custom Video',
+              desc: 'Your stereoscopic video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
+              badge: 'Custom SBS',
+              badgeColor: '#5b9fd4',
+            },
+            {
+              id: 'labubu',
+              title: 'Labubu Toy Walk',
+              desc: 'Original demo featuring a Labubu toy walking down a high-detail store aisle.',
+              badge: 'Demo',
+              badgeColor: '#3ecf8e',
+            },
+          ].map((item) => {
+            const isSelected = selectedVideo === item.id;
+            return (
+              <div
+                key={item.id}
+                onClick={() => setSelectedVideo(item.id as 'labubu' | 'custom')}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  border: isSelected ? '2px solid #5b9fd4' : '1px solid #2a3848',
+                  background: isSelected ? 'rgba(91,159,212,0.15)' : '#1c2836',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontWeight: 700, color: '#fff', fontSize: 12 }}>{item.title}</span>
+                  <span style={{
+                    fontSize: 9,
+                    padding: '2px 6px',
+                    borderRadius: 10,
+                    background: item.badgeColor,
+                    color: '#000',
+                    fontWeight: 'bold'
+                  }}>
+                    {item.badge}
+                  </span>
+                </div>
+                <div style={{ fontSize: 10, color: '#8fa3b8', lineHeight: 1.3 }}>{item.desc}</div>
+              </div>
+            );
+          })}
         </div>
         <label style={sliderLabel}>
           Pop-out {relief.toFixed(2)}
