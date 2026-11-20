@@ -135,6 +135,28 @@ def save_status(queue_files: list[Path] = [], current_processing: dict | None = 
     STATUS_FILE.write_text(json.dumps(status, indent=2))
 
 
+def clear_clutter():
+    log("Running regular clutter clearance routine...")
+    # Clean up temporary cached directories, corrupted files, old logs
+    # 1. Clean up old __pycache__
+    for p in BASE_DIR.glob("**/__pycache__"):
+        try:
+            shutil.rmtree(p)
+            log(f"Cleared cache: {p}")
+        except Exception:
+            pass
+    # 2. Clean up any non-mp4 files in queue
+    for f in QUEUE_DIR.glob("*"):
+        if f.suffix not in [".mp4", ".mkv"]:
+            try:
+                if f.is_file(): f.unlink()
+                elif f.is_dir(): shutil.rmtree(f)
+                log(f"Cleared queued clutter: {f.name}")
+            except Exception:
+                pass
+    log("Clutter clearance completed successfully.")
+
+
 def run_cmd(cmd: list[str], cwd: Path = BASE_DIR) -> bool:
     try:
         log(f"Running: {' '.join(cmd)}")
@@ -490,11 +512,27 @@ def monitor_loop():
     log("=== 3D Autostereoscopic Processing & Testing Harness Booted ===")
     log(f"Monitoring queue directory: {QUEUE_DIR}")
     
+    # Run clutter clearance on start
+    try:
+        clear_clutter()
+    except Exception as e:
+        log(f"Error during initial clearance: {e}")
+    
     # Initialize status file on start
     save_status(queue_files=list(QUEUE_DIR.glob("*.mp4")))
+    
+    last_cleanup = time.time()
 
     while True:
         try:
+            # Run clutter clearance once every 24 hours
+            if time.time() - last_cleanup > 86400:
+                try:
+                    clear_clutter()
+                    last_cleanup = time.time()
+                except Exception as e:
+                    log(f"Error during periodic clearance: {e}")
+
             # Check for new files in queue
             files = list(QUEUE_DIR.glob("*.mp4"))
             save_status(queue_files=files)
