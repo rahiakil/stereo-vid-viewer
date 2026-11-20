@@ -76,6 +76,11 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
       depth = `${BASE}media/fuarukee_depth.mp4`;
       matte = `${BASE}media/fuarukee_matte.mp4`;
       bg_target = `${BASE}media/fuarukee_bg_clean.mp4`;
+    } else if (selectedVideo === 'seal_demo') {
+      fg = `${BASE}media/seal_demo_rgb.mp4`;
+      depth = `${BASE}media/seal_demo_depth.mp4`;
+      matte = `${BASE}media/seal_demo_matte.mp4`;
+      bg_target = `${BASE}media/seal_demo_bg_clean.mp4`;
     } else if (selectedVideo === 'dancing_demo') {
       fg = `${BASE}media/dancing_demo_rgb.mp4`;
       depth = `${BASE}media/dancing_demo_depth.mp4`;
@@ -322,6 +327,13 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
               desc: 'Dynamic foreground dancers reconstructed with high-fidelity depth-mesh and empty background plate.',
               badge: 'Auto Scraped',
               badgeColor: '#10b981',
+            },
+            {
+              id: 'seal_demo',
+              title: 'Seal Demo',
+              desc: 'Underwater seal swimming. Reconstructed into continuous, flowing autostereoscopic mesh.',
+              badge: 'Auto Scraped',
+              badgeColor: '#3b82f6',
             },
             {
               id: 'office_demo',
