@@ -13,6 +13,7 @@ import json
 import os
 import re
 import shutil
+import urllib.request
 import subprocess
 import sys
 import time
@@ -31,6 +32,34 @@ QUEUE_DIR.mkdir(parents=True, exist_ok=True)
 MEDIA_DIR.mkdir(parents=True, exist_ok=True)
 DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
 
+# Curated library of open-copyrighted stereoscopic benchmark videos to continuously scrape & optimize
+AUTO_ASSETS = [
+    {
+        "id": "cows_demo",
+        "title": "Cows Demo",
+        "url": "https://github.com/calledit/metric_depth_video_toolbox/releases/download/Showcase/OLD_No_INFILL_cows_crop_depth.mkv_stereo.mp4",
+        "desc": "Scrape benchmark showing grazing cows. Reconstructed into 3D mesh sequence with matte-bypass continuous relief.",
+        "badge": "Auto Scraped",
+        "badgeColor": "#f59e0b"
+    },
+    {
+        "id": "dancing_demo",
+        "title": "Dancing Demo",
+        "url": "https://github.com/calledit/metric_depth_video_toolbox/releases/download/Showcase/OLD_No_INFILL_dancing_crop_depth.mkv_stereo.mp4",
+        "desc": "Dynamic foreground dancers reconstructed with high-fidelity depth-mesh and empty background plate.",
+        "badge": "Auto Scraped",
+        "badgeColor": "#10b981"
+    },
+    {
+        "id": "seal_demo",
+        "title": "Seal Demo",
+        "url": "https://github.com/calledit/metric_depth_video_toolbox/releases/download/Showcase/OLD_No_INFILL_seal_crop_depth.mkv_stereo.mp4",
+        "desc": "Underwater seal swimming. Reconstructed into continuous, flowing autostereoscopic mesh.",
+        "badge": "Auto Scraped",
+        "badgeColor": "#3b82f6"
+    }
+]
+
 
 def log(msg: str):
     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}", flush=True)
@@ -47,8 +76,29 @@ def get_system_stats() -> dict:
     return {"cpu": cpu, "memory": mem}
 
 
+def clear_clutter():
+    log("Running regular clutter clearance routine...")
+    # Clean up temporary cached directories, corrupted files, old logs
+    # 1. Clean up old __pycache__
+    for p in BASE_DIR.glob("**/__pycache__"):
+        try:
+            shutil.rmtree(p)
+            log(f"Cleared cache: {p}")
+        except Exception:
+            pass
+    # 2. Clean up any non-mp4 files in queue
+    for f in QUEUE_DIR.glob("*"):
+        if f.suffix not in [".mp4", ".mkv"]:
+            try:
+                if f.is_file(): f.unlink()
+                elif f.is_dir(): shutil.rmtree(f)
+                log(f"Cleared queued clutter: {f.name}")
+            except Exception:
+                pass
+    log("Clutter clearance completed successfully.")
+
+
 def save_status(queue_files: list[Path] = [], current_processing: dict | None = None, history_entry: dict | None = None):
-    # Pre-seed defaults if file doesn't exist or is invalid
     default_status = {
         "system": {
             "cpu_usage_pct": 35.0,
@@ -105,7 +155,6 @@ def save_status(queue_files: list[Path] = [], current_processing: dict | None = 
     status["system"]["cpu_usage_pct"] = sys_stats["cpu"]
     status["system"]["memory_usage_pct"] = sys_stats["memory"]
 
-    # Filter queue files to exclude current processing
     pending = []
     for f in queue_files:
         if current_processing and f.name == current_processing.get("name"):
@@ -117,7 +166,6 @@ def save_status(queue_files: list[Path] = [], current_processing: dict | None = 
         status["queue"].insert(0, current_processing)
 
     if history_entry:
-        # Check if already exists in history
         exists = False
         for i, h in enumerate(status["history"]):
             if h["id"] == history_entry["id"]:
@@ -133,28 +181,6 @@ def save_status(queue_files: list[Path] = [], current_processing: dict | None = 
             status["system"]["avg_processing_time_sec"] = round(sum(times) / len(times), 1)
 
     STATUS_FILE.write_text(json.dumps(status, indent=2))
-
-
-def clear_clutter():
-    log("Running regular clutter clearance routine...")
-    # Clean up temporary cached directories, corrupted files, old logs
-    # 1. Clean up old __pycache__
-    for p in BASE_DIR.glob("**/__pycache__"):
-        try:
-            shutil.rmtree(p)
-            log(f"Cleared cache: {p}")
-        except Exception:
-            pass
-    # 2. Clean up any non-mp4 files in queue
-    for f in QUEUE_DIR.glob("*"):
-        if f.suffix not in [".mp4", ".mkv"]:
-            try:
-                if f.is_file(): f.unlink()
-                elif f.is_dir(): shutil.rmtree(f)
-                log(f"Cleared queued clutter: {f.name}")
-            except Exception:
-                pass
-    log("Clutter clearance completed successfully.")
 
 
 def run_cmd(cmd: list[str], cwd: Path = BASE_DIR) -> bool:
@@ -183,7 +209,7 @@ def get_video_duration(path: Path) -> float:
 def process_video(path: Path) -> dict | None:
     """Run full AI extraction pipeline on SBS video."""
     name = path.stem.lower().replace(" ", "_").replace("-", "_")
-    log(f"Starting processing for: {path.name} (name: {name}")
+    log(f"Starting processing for: {path.name} (name: {name})")
     start_time = time.time()
 
     # Outputs
@@ -248,12 +274,23 @@ def process_video(path: Path) -> dict | None:
 
     duration = round(time.time() - start_time, 1)
     log(f"All AI streams successfully generated for {name} in {duration}s!")
+    
+    # Determine default badge details from known lists if matches
+    badge = "Auto Processed"
+    badge_color = "#a78bfa"
+    desc = f"Processed stereoscopic video '{name}'. Left eye view reconstructed into 3D mesh with empty in-painted background."
+    for asset in AUTO_ASSETS:
+        if asset["id"] == name:
+            badge = asset["badge"]
+            badge_color = asset["badgeColor"]
+            desc = asset["desc"]
+
     return {
         "id": name,
         "title": name.replace("_", " ").title(),
-        "desc": f"Processed stereoscopic video '{name}'. Left eye view reconstructed into 3D mesh with empty in-painted background.",
-        "badge": "Auto Processed",
-        "badgeColor": "#a78bfa",
+        "desc": desc,
+        "badge": badge,
+        "badgeColor": badge_color,
         "duration_sec": 10.0,
         "processing_time_sec": duration
     }
@@ -266,12 +303,6 @@ def update_react_code(meta: dict):
     # 1. Update SneakerDemo.tsx library arrays and types
     demo_path = BASE_DIR / "src" / "components" / "SneakerDemo.tsx"
     content = demo_path.read_text()
-
-    # Expand types
-    type_pattern = r"setSelectedVideo\s*=\s*useState<'labubu'\s*\|\s*'custom'\s*\|\s*'fuarukee'>\('fuarukee'\)"
-    if type_pattern in content:
-        # replace with expanded type list
-        pass
 
     # We can inject loading code for the new ID in the useEffect
     effect_search = """    } else if (selectedVideo === 'fuarukee') {
@@ -298,23 +329,26 @@ def update_react_code(meta: dict):
 
     # Expand type list in state and typecasting
     content = content.replace(
-        "setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee')",
-        f"setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee' | '{meta['id']}')"
+        "setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee' | 'office_demo')",
+        f"setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee' | 'office_demo' | '{meta['id']}')"
     )
     content = re.sub(
-        r"useState<'labubu' \| 'custom' \| 'fuarukee'>",
-        f"useState<'labubu' | 'custom' | 'fuarukee' | '{meta['id']}'>",
+        r"useState<'labubu' \| 'custom' \| 'fuarukee' \| 'office_demo' \| string>",
+        f"useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | '{meta['id']}' | string>",
         content
     )
 
     # Inject Library card
     card_search = """            {
-              id: 'fuarukee',
-              title: 'Fuarukee POV',
-              desc: 'Your brand new stereoscopic POV video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
-              badge: 'New Custom SBS',
-              badgeColor: '#e0c068',
+              id: 'office_demo',
+              title: 'Office Demo',
+              desc: 'Processed stereoscopic video "office_demo". Left eye view reconstructed into 3D mesh with empty in-painted background.',
+              badge: 'Auto Processed',
+              badgeColor: '#a78bfa',
             },"""
+
+    # Determine isFuarukee landscape or subject for mapping toggle
+    has_matte_str = "false" if "fuarukee" in meta["id"] or "seal" in meta["id"] or "cows" in meta["id"] else "true"
 
     card_replace = f"""            {{
               id: '{meta['id']}',
@@ -324,11 +358,11 @@ def update_react_code(meta: dict):
               badgeColor: '{meta['badgeColor']}',
             }},
             {{
-              id: 'fuarukee',
-              title: 'Fuarukee POV',
-              desc: 'Your brand new stereoscopic POV video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
-              badge: 'New Custom SBS',
-              badgeColor: '#e0c068',
+              id: 'office_demo',
+              title: 'Office Demo',
+              desc: 'Processed stereoscopic video "office_demo". Left eye view reconstructed into 3D mesh with empty in-painted background.',
+              badge: 'Auto Processed',
+              badgeColor: '#a78bfa',
             }},"""
 
     if f"id: '{meta['id']}'" not in content:
@@ -358,8 +392,8 @@ def update_react_code(meta: dict):
 
     # Expand portalVideo state type
     app_content = re.sub(
-        r"setPortalVideo\s*=\s*useState<'labubu'\s*\|\s*'custom'\s*\|\s*'fuarukee'>",
-        f"setPortalVideo = useState<'labubu' | 'custom' | 'fuarukee' | '{meta['id']}'>",
+        r"setPortalVideo\s*=\s*useState<'labubu'\s*\|\s*'custom'\s*\|\s*'fuarukee'\s*\|\s*'office_demo'\s*\|\s*string>",
+        f"setPortalVideo = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | '{meta['id']}' | string>",
         app_content
     )
 
@@ -404,11 +438,15 @@ def update_react_code(meta: dict):
 
 
 async def run_playwright_test(vid_id: str, meta: dict) -> dict:
-    """Launch headless browser, simulate eye movements, check rendering & compute 3D fidelity."""
+    """Launch headless browser, simulate eye movements, audit rendering & optimize 3D relief."""
     from playwright.async_api import async_playwright
-    log(f"Launching simulated human-eye test for {vid_id}...")
+    log(f"Launching evolutionary 3D optimization routine for {vid_id}...")
 
-    metrics = {"status": "success", "errors": [], "parallax_variance": 0.0}
+    # We will test multiple relief levels to find the absolute best pop-out variance rating!
+    test_reliefs = [0.08, 0.16, 0.26]
+    best_relief = 0.16
+    best_variance = 0.0
+    final_metrics = {"status": "success", "errors": [], "parallax_variance": 0.0, "best_relief": 0.16}
 
     try:
         async with async_playwright() as p:
@@ -419,81 +457,101 @@ async def run_playwright_test(vid_id: str, meta: dict) -> dict:
             )
             page = await context.new_page()
 
-            # Record errors
-            page.on("pageerror", lambda err: metrics["errors"].append(str(err)))
+            page.on("pageerror", lambda err: final_metrics["errors"].append(str(err)))
 
-            # Open local preview (Vite dev server runs permanently as systemd user service)
-            await page.goto("http://localhost:5177/")
+            # Open permanent local dev server
+            await page.goto("https://localhost:5177/")
             await asyncio.sleep(5)
 
             # Click on our new video card in the library
-            log("Navigating to processed video in UI...")
+            log(f"Navigating to video card: {vid_id}")
             await page.click(f"text={vid_id.replace('_', ' ').title()}")
             await asyncio.sleep(4)
 
-            # --- PARALLAX SIMULATION HARNESS ---
-            log("Simulating Head-Movement Sweep (Left -> Center -> Right)...")
-            
-            # 1. Sweep Far Left
-            await page.evaluate("window.setPoseValue ? window.setPoseValue({x: 0.1, y: 0.5, z: 0.8}) : console.log('manual sweep left')")
-            await asyncio.sleep(1)
-            left_shot = DASHBOARD_DIR / f"{vid_id}_left.png"
-            await page.screenshot(path=left_shot)
-
-            # 2. Sweep Far Right
-            await page.evaluate("window.setPoseValue ? window.setPoseValue({x: 0.9, y: 0.5, z: 0.8}) : console.log('manual sweep right')")
-            await asyncio.sleep(1)
-            right_shot = DASHBOARD_DIR / f"{vid_id}_right.png"
-            await page.screenshot(path=right_shot)
-
-            # Compute pixel variance
             import cv2
             import numpy as np
 
-            img_l = cv2.imread(str(left_shot), cv2.IMREAD_GRAYSCALE)
-            img_r = cv2.imread(str(right_shot), cv2.IMREAD_GRAYSCALE)
-            
-            if img_l is not None and img_r is not None:
-                diff = cv2.absdiff(img_l, img_r)
-                variance = float(np.mean(diff))
-                metrics["parallax_variance"] = variance
-                log(f"Computed 3D Parallax Fidelity Metric: {variance:.4f}")
-            else:
-                log("⚠ FAILED to load screenshots for metric calculations.")
+            # Optimization Loop
+            for r_val in test_reliefs:
+                log(f"Testing 3D pop-out displacement (relief = {r_val})...")
+                await page.evaluate(f"window.setReliefValue ? window.setReliefValue({r_val}) : console.log('manual set relief')")
+                await asyncio.sleep(1)
+
+                # 1. Sweep Left
+                await page.evaluate("window.setPoseValue ? window.setPoseValue({x: 0.15, y: 0.5, z: 0.8}) : console.log('manual sweep left')")
+                await asyncio.sleep(1)
+                left_shot = DASHBOARD_DIR / f"{vid_id}_left.png"
+                await page.screenshot(path=left_shot)
+
+                # 2. Sweep Right
+                await page.evaluate("window.setPoseValue ? window.setPoseValue({x: 0.85, y: 0.5, z: 0.8}) : console.log('manual sweep right')")
+                await asyncio.sleep(1)
+                right_shot = DASHBOARD_DIR / f"{vid_id}_right.png"
+                await page.screenshot(path=right_shot)
+
+                # Compute variance
+                img_l = cv2.imread(str(left_shot), cv2.IMREAD_GRAYSCALE)
+                img_r = cv2.imread(str(right_shot), cv2.IMREAD_GRAYSCALE)
+                
+                if img_l is not None and img_r is not None:
+                    diff = cv2.absdiff(img_l, img_r)
+                    variance = float(np.mean(diff))
+                    log(f"Displacement Score for relief {r_val}: {variance:.2f}")
+                    
+                    # We want the maximum horizontal variance (pop-out) under 10.0 (to avoid warping/ripping clipping)
+                    if variance > best_variance and variance < 10.0:
+                        best_variance = variance
+                        best_relief = r_val
+                else:
+                    log("⚠ Failed to capture images for variance check.")
+
+            log(f"✓ Algorithmic Optimization Completed! Ideal Relief identified: {best_relief} (Score: {best_variance:.2f})")
+            final_metrics["parallax_variance"] = best_variance
+            final_metrics["best_relief"] = best_relief
+
+            # Save the final optimal screenshots
+            await page.evaluate(f"window.setReliefValue({best_relief})")
+            await page.evaluate("window.setPoseValue({x: 0.15, y: 0.5, z: 0.8})")
+            await asyncio.sleep(1)
+            await page.screenshot(path=DASHBOARD_DIR / f"{vid_id}_left.png")
+
+            await page.evaluate("window.setPoseValue({x: 0.85, y: 0.5, z: 0.8})")
+            await asyncio.sleep(1)
+            await page.screenshot(path=DASHBOARD_DIR / f"{vid_id}_right.png")
 
             await browser.close()
     except Exception as e:
-        log(f"Playwright run crashed: {e}")
-        metrics["status"] = "failed"
-        metrics["errors"].append(str(e))
+        log(f"Evolutionary test run crashed: {e}")
+        final_metrics["status"] = "failed"
+        final_metrics["errors"].append(str(e))
 
-    # Save history entry
+    # Save optimized history entry
     history_entry = {
         "id": vid_id,
         "title": meta["title"],
         "duration_sec": meta["duration_sec"],
         "processing_time_sec": meta["processing_time_sec"],
-        "parallax_variance": round(metrics.get("parallax_variance", 0.0), 2),
-        "status": metrics["status"],
+        "parallax_variance": round(final_metrics["parallax_variance"], 2),
+        "status": final_metrics["status"],
         "left_screenshot": f"media/dashboard/{vid_id}_left.png",
         "right_screenshot": f"media/dashboard/{vid_id}_right.png",
-        "description": meta["desc"]
+        "description": f"{meta['desc']} (Optimized Relief: {best_relief})"
     }
     save_status(queue_files=list(QUEUE_DIR.glob("*.mp4")), current_processing=None, history_entry=history_entry)
     
     # Save metrics report
     report_path = DASHBOARD_DIR / f"{vid_id}_report.json"
     with open(report_path, "w") as f:
-        json.dump(metrics, f, indent=2)
-    log(f"Fidelity report saved to {report_path}")
-    return metrics
+        json.dump(final_metrics, f, indent=2)
+    log(f"Optimal parameter reports saved to {report_path}")
+    return final_metrics
 
 
 def push_to_remote():
     log("Committing and pushing new assets live...")
     run_cmd(["git", "add", "-f", "public/media/*"])
     run_cmd(["git", "add", "src/App.tsx", "src/components/SneakerDemo.tsx"])
-    run_cmd(["git", "commit", "-m", "Automated processed video addition & fidelity report"])
+    run_cmd(["git", "commit", "-m", "Automated processed video addition & evolutionary fidelity optimization"])
     run_cmd(["git", "push", "origin", "main"])
     log("Pushed successfully! Live deploy triggered.")
 
@@ -523,8 +581,51 @@ def monitor_loop():
                 except Exception as e:
                     log(f"Error during periodic clearance: {e}")
 
-            # Check for new files in queue
+            # Check for files in queue
             files = list(QUEUE_DIR.glob("*.mp4"))
+            
+            if not files:
+                # === CONTINUOUS AUTO-SCRAPER FEEDER ===
+                # If queue is empty, check which of our curated benchmark videos is not yet processed!
+                status_dict = {"history": []}
+                if STATUS_FILE.exists():
+                    try:
+                        status_dict = json.loads(STATUS_FILE.read_text())
+                    except Exception:
+                        pass
+                
+                # Only count successful runs so failed runs can be proactively re-tried/re-processed
+                history_ids = [h["id"] for h in status_dict.get("history", []) if h.get("status") != "failed"]
+                
+                next_target = None
+                for asset in AUTO_ASSETS:
+                    if asset["id"] not in history_ids:
+                        next_target = asset
+                        break
+                
+                if next_target:
+                    log(f"Harness Queue is empty. Proactively scraping next benchmark video: {next_target['title']}")
+                    save_status(
+                        queue_files=[],
+                        current_processing={
+                            "name": f"{next_target['id']}.mp4",
+                            "status": "processing",
+                            "stage": f"Proactively downloading {next_target['title']} benchmark stream...",
+                            "progress": 5
+                        }
+                    )
+                    
+                    # Download directly using urllib
+                    dl_path = QUEUE_DIR / f"{next_target['id']}.mp4"
+                    try:
+                        urllib.request.urlretrieve(next_target["url"], str(dl_path))
+                        log(f"Successfully auto-scraped and queued: {next_target['id']}.mp4")
+                        files = [dl_path]
+                    except Exception as e:
+                        log(f"Failed to auto-scrape {next_target['id']}: {e}")
+                        time.sleep(10)
+                        continue
+            
             save_status(queue_files=files)
             
             if files:
@@ -538,7 +639,8 @@ def monitor_loop():
                     # Push live
                     push_to_remote()
                 # Delete from queue once fully processed
-                target.unlink()
+                if target.exists():
+                    target.unlink()
             
             time.sleep(10)
         except KeyboardInterrupt:
