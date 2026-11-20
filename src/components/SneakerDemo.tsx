@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pause, Play, ChevronLeft, ChevronRight, Activity, Sliders, Video, AlertCircle } from 'lucide-react';
+import { Pause, Play, ChevronLeft, ChevronRight, Activity, Sliders, Video, AlertCircle, RefreshCw } from 'lucide-react';
 import FaceTracker from './FaceTracker';
 import { HeadPose } from '../utils/headPose';
 import { DepthMeshScene, DepthMeshStats } from '../utils/depthMeshScene';
@@ -46,6 +46,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
   const [showCamera, setShowCamera] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | string>(defaultVideo || 'fuarukee');
   const [useMatte, setUseMatte] = useState(false);
+  const [isSweeping, setIsSweeping] = useState(false);
 
   useEffect(() => {
     setUseMatte(selectedVideo !== 'fuarukee');
@@ -130,6 +131,23 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
     if (pose) setPoseLabel(`x ${pose.x.toFixed(2)}  y ${pose.y.toFixed(2)}  z ${pose.z.toFixed(2)}`);
     else setPoseLabel('no face — move into webcam');
   }, []);
+
+  useEffect(() => {
+    if (!isSweeping) return;
+    let frameId: number;
+    const startTime = Date.now();
+    
+    const animate = () => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      // Smooth sinusoidal horizontal head sweep between 0.15 and 0.85
+      const x = 0.5 + 0.35 * Math.sin(elapsed * Math.PI * 0.5);
+      onHeadPose({ x, y: 0.5, z: 0.8 });
+      frameId = requestAnimationFrame(animate);
+    };
+    
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [isSweeping, onHeadPose]);
 
   useEffect(() => {
     (window as any).setPoseValue = (pose: HeadPose) => {
@@ -255,7 +273,22 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
         <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
           <button type="button" onClick={togglePlay} disabled={!ready} style={btnStyle(ready)}>
             {playing ? <Pause size={14} /> : <Play size={14} />}
-            {playing ? 'Pause' : 'Play'}
+            {playing ? ' ' + (playing ? 'Pause' : 'Play') : ''}
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsSweeping(!isSweeping)}
+            disabled={!ready}
+            style={{
+              ...btnStyle(ready),
+              background: isSweeping ? '#3ecf8e' : '#1c2836',
+              color: isSweeping ? '#000' : '#fff',
+              borderColor: isSweeping ? '#3ecf8e' : '#2a3848',
+              fontWeight: 'bold',
+            }}
+          >
+            <RefreshCw size={14} className={isSweeping ? 'animate-spin' : ''} />
+            {isSweeping ? ' Stop Sweep' : ' Simulate Head Sweep'}
           </button>
         </div>
         <div style={{ color: '#8fa3b8', fontSize: 10, marginBottom: 8 }}>PROCESSED VIDEO LIBRARY</div>
