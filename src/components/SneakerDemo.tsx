@@ -44,7 +44,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
   const [showInspector, setShowInspector] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showCamera, setShowCamera] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | string>(defaultVideo || 'fuarukee');
+  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | 'cows_demo' | string>(defaultVideo || 'fuarukee');
   const [useMatte, setUseMatte] = useState(false);
   const [isSweeping, setIsSweeping] = useState(false);
 
@@ -76,6 +76,11 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
       depth = `${BASE}media/fuarukee_depth.mp4`;
       matte = `${BASE}media/fuarukee_matte.mp4`;
       bg_target = `${BASE}media/fuarukee_bg_clean.mp4`;
+    } else if (selectedVideo === 'cows_demo') {
+      fg = `${BASE}media/cows_demo_rgb.mp4`;
+      depth = `${BASE}media/cows_demo_depth.mp4`;
+      matte = `${BASE}media/cows_demo_matte.mp4`;
+      bg_target = `${BASE}media/cows_demo_bg_clean.mp4`;
     } else if (selectedVideo === 'office_demo') {
       fg = `${BASE}media/office_demo_rgb.mp4`;
       depth = `${BASE}media/office_demo_depth.mp4`;
@@ -153,8 +158,13 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
     (window as any).setPoseValue = (pose: HeadPose) => {
       onHeadPose(pose);
     };
+    (window as any).setReliefValue = (val: number) => {
+      setRelief(val);
+      sceneRef.current?.setRelief(val);
+    };
     return () => {
       delete (window as any).setPoseValue;
+      delete (window as any).setReliefValue;
     };
   }, [onHeadPose]);
 
@@ -295,6 +305,13 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
           {[
             {
+              id: 'cows_demo',
+              title: 'Cows Demo',
+              desc: 'Scrape benchmark showing grazing cows. Reconstructed into 3D mesh sequence with matte-bypass continuous relief.',
+              badge: 'Auto Scraped',
+              badgeColor: '#f59e0b',
+            },
+            {
               id: 'office_demo',
               title: 'Office Demo',
               desc: 'Processed stereoscopic video "office_demo". Left eye view reconstructed into 3D mesh with empty in-painted background.',
@@ -327,7 +344,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             return (
               <div
                 key={item.id}
-                onClick={() => setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee' | 'office_demo')}
+                onClick={() => setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee' | 'office_demo' | 'cows_demo')}
                 style={{
                   padding: '10px 12px',
                   borderRadius: 8,

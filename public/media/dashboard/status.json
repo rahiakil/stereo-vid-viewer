@@ -1,12 +1,29 @@
 {
   "system": {
-    "cpu_usage_pct": 12.9,
-    "memory_usage_pct": 36.9,
-    "avg_processing_time_sec": 42.0,
-    "total_processed": 3
+    "cpu_usage_pct": 15.5,
+    "memory_usage_pct": 37.8,
+    "avg_processing_time_sec": 55.4,
+    "total_processed": 4
   },
-  "queue": [],
+  "queue": [
+    {
+      "name": "cows_demo.mp4",
+      "status": "pending",
+      "progress": 0
+    }
+  ],
   "history": [
+    {
+      "id": "cows_demo",
+      "title": "Cows Demo",
+      "duration_sec": 10.0,
+      "processing_time_sec": 119.7,
+      "parallax_variance": 0.0,
+      "status": "failed",
+      "left_screenshot": "media/dashboard/cows_demo_left.png",
+      "right_screenshot": "media/dashboard/cows_demo_right.png",
+      "description": "Scrape benchmark showing grazing cows. Reconstructed into 3D mesh sequence with matte-bypass continuous relief. (Optimized Relief: 0.16)"
+    },
     {
       "id": "fuarukee",
       "title": "Fuarukee POV",

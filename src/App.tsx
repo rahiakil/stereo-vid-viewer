@@ -46,9 +46,12 @@ export default function App() {
     if (portalVideo === 'custom') {
       videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4`;
-    } else if (portalVideo === 'fuarukee') {
+    } else if (portalVideo === 'cows_demo') {
       videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4`;
+    } else if (portalVideo === 'cows_demo') {
+      videoUrl = `${import.meta.env.BASE_URL}media/cows_demo_stereo.mp4`;
+      depthUrl = `${import.meta.env.BASE_URL}media/cows_demo_depth.mp4`;
     } else if (portalVideo === 'office_demo') {
       videoUrl = `${import.meta.env.BASE_URL}media/office_demo_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/office_demo_depth.mp4`;
