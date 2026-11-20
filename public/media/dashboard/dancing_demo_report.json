@@ -1,7 +1,7 @@
 {
-  "status": "failed",
+  "status": "success",
   "errors": [
-    "Page.goto: net::ERR_EMPTY_RESPONSE at http://localhost:5177/\nCall log:\n  - navigating to \"http://localhost:5177/\", waiting until \"load\"\n"
+    "Not supported"
   ],
   "parallax_variance": 0.0,
   "best_relief": 0.16

@@ -1,13 +1,13 @@
 {
   "system": {
-    "cpu_usage_pct": 89.6,
-    "memory_usage_pct": 39.9,
-    "avg_processing_time_sec": 75.6,
+    "cpu_usage_pct": 88.6,
+    "memory_usage_pct": 39.8,
+    "avg_processing_time_sec": 80.8,
     "total_processed": 6
   },
   "queue": [
     {
-      "name": "cows_demo.mp4",
+      "name": "dancing_demo.mp4",
       "status": "pending",
       "progress": 0
     }
@@ -28,9 +28,9 @@
       "id": "dancing_demo",
       "title": "Dancing Demo",
       "duration_sec": 10.0,
-      "processing_time_sec": 103.5,
+      "processing_time_sec": 134.5,
       "parallax_variance": 0.0,
-      "status": "failed",
+      "status": "success",
       "left_screenshot": "media/dashboard/dancing_demo_left.png",
       "right_screenshot": "media/dashboard/dancing_demo_right.png",
       "description": "Dynamic foreground dancers reconstructed with high-fidelity depth-mesh and empty background plate. (Optimized Relief: 0.16)"
