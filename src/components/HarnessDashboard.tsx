@@ -127,6 +127,29 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
     return () => clearInterval(interval);
   }, [selectedHistory]);
 
+  // Programmatic preloading & caching of the best results
+  useEffect(() => {
+    const historyList = data?.history || [];
+    if (historyList.length > 0) {
+      const BASE_URL = import.meta.env.BASE_URL || '/';
+      const bestVideos = historyList.filter(item => item.parallax_variance >= 4.0);
+      bestVideos.forEach(item => {
+        const videoUrl = `${BASE_URL}media/${item.id}_stereo.mp4`;
+        const depthUrl = `${BASE_URL}media/${item.id}_depth.mp4`;
+        const leftUrl = `${BASE_URL}${item.left_screenshot}`;
+        const rightUrl = `${BASE_URL}${item.right_screenshot}`;
+
+        // Prime image cache
+        const imgL = new Image(); imgL.src = leftUrl;
+        const imgR = new Image(); imgR.src = rightUrl;
+
+        // Prime browser video/HTTP cache with force-cache and low priority
+        fetch(videoUrl, { cache: 'force-cache', ...({ priority: 'low' } as any) }).catch(() => {});
+        fetch(depthUrl, { cache: 'force-cache', ...({ priority: 'low' } as any) }).catch(() => {});
+      });
+    }
+  }, [data?.history]);
+
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: '#8fa3b8' }}>
@@ -140,6 +163,21 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
   const queue = data?.queue || [];
   const history = data?.history || [];
   const BASE_URL = import.meta.env.BASE_URL || '/';
+
+  const bestVideos = history.filter(item => item.parallax_variance >= 4.0);
+  const archivedVideos = history.filter(item => item.parallax_variance < 4.0);
+  const totalCount = history.length;
+  const bestCount = bestVideos.length;
+  const archivedCount = archivedVideos.length;
+  const avgParallax = totalCount > 0 ? history.reduce((sum, h) => sum + h.parallax_variance, 0) / totalCount : 0;
+
+  const topPerformer = totalCount > 0 
+    ? [...history].sort((a, b) => b.parallax_variance - a.parallax_variance)[0]
+    : null;
+
+  const analysisDescription = totalCount > 0
+    ? `We have dynamically analyzed all ${totalCount} processed stereoscopic video runs. Among them, ${bestCount} video(s) show spectacular depth separation with a 3D Parallax Index >= 4.0 (graded as "Best"), while ${archivedCount} video(s) have flatter or experimental structures. The overall average 3D Parallax Index is ${avgParallax.toFixed(2)}. The highest performing asset is "${topPerformer?.title}" with a spectacular score of ${topPerformer?.parallax_variance.toFixed(2)}, indicating outstanding off-axis viewpoint relief.`
+    : "No processed videos are currently cataloged for quality audit.";
 
   return (
     <div style={{ padding: '16px 24px', maxWidth: 1200, margin: '0 auto', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif' }}>
@@ -290,67 +328,191 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
       </div>
 
       {activeTab === 'audits' ? (
-        /* Main Grid: History Cards on left, Eye screenshots on right */
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 20, marginBottom: 24, alignItems: 'start' }}>
-          
-          {/* Left Side: Processed Video Library Cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <h2 style={{ fontSize: 14, fontWeight: 800, margin: '0 0 4px', color: '#fff', letterSpacing: 0.5, textTransform: 'uppercase' }}>
-              Simulated Audit Results
-            </h2>
-            {history.map((item) => {
-              const isSelected = selectedHistory?.id === item.id;
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => setSelectedHistory(item)}
-                  style={{
-                    ...historyCardStyle,
-                    border: isSelected ? '2px solid #3ecf8e' : '1px solid #1e293b',
-                    background: isSelected ? 'rgba(62, 207, 142, 0.08)' : '#0f172a',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <span style={{ fontWeight: 800, fontSize: 13, color: '#fff' }}>{item.title}</span>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, background: '#1e293b', padding: '2px 6px', borderRadius: 4, color: '#38bdf8' }}>
-                        {item.processing_time_sec}s conversion
-                      </span>
-                      <span style={{
-                        fontSize: 10,
-                        fontWeight: 800,
-                        background: item.parallax_variance > 1.5 ? 'rgba(62, 207, 142, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                        color: item.parallax_variance > 1.5 ? '#3ecf8e' : '#ef4444',
-                        padding: '2px 6px',
-                        borderRadius: 4
-                      }}>
-                        3D Index: {item.parallax_variance.toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-                  <p style={{ margin: '0 0 10px', fontSize: 11, color: '#94a3b8', lineHeight: 1.3 }}>
-                    {item.description}
-                  </p>
-                  
-                  {/* Play Buttons */}
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onPlayVideo(item.id, 'mesh'); }}
-                      style={{ ...actionBtnStyle, background: '#10b981' }}
-                    >
-                      <Film size={11} /> Play as 3D Mesh
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onPlayVideo(item.id, 'portal'); }}
-                      style={{ ...actionBtnStyle, background: '#3b82f6' }}
-                    >
-                      <Eye size={11} /> Play in Portal View
-                    </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Full-width 3D Parallax Analysis & Quality Audit Card */}
+          <div style={{ ...cardStyle, background: 'linear-gradient(to right, #0f172a, #112240)', border: '1px solid #1e3a8a', padding: 16, marginBottom: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, color: '#38bdf8' }}>
+              <Activity size={18} />
+              <h3 style={{ fontSize: 13, fontWeight: 800, margin: 0, letterSpacing: 0.5, textTransform: 'uppercase', color: '#38bdf8' }}>
+                3D Parallax Analysis & Quality Audit
+              </h3>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20, alignItems: 'center' }}>
+              {/* Visual Progress/Metrics breakdown */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.1)', borderRadius: 8, padding: 10, textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>Avg. 3D Index</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#38bdf8' }}>{avgParallax.toFixed(1)}</div>
+                </div>
+                <div style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.1)', borderRadius: 8, padding: 10, textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>High-Fidelity Ratio</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#3ecf8e' }}>
+                    {totalCount > 0 ? `${Math.round((bestCount / totalCount) * 100)}%` : '0%'}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+              
+              {/* Analysis text summary */}
+              <div>
+                <p style={{ margin: 0, fontSize: 11, color: '#cbd5e1', lineHeight: 1.5 }}>
+                  {analysisDescription}
+                </p>
+                <div style={{ marginTop: 8, display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', padding: '2px 6px', borderRadius: 4 }}>
+                    🌟 Best: {bestCount}
+                  </span>
+                  <span style={{ fontSize: 9, fontWeight: 800, background: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', padding: '2px 6px', borderRadius: 4 }}>
+                    📂 Archive: {archivedCount}
+                  </span>
+                  <span style={{ fontSize: 9, color: '#94a3b8', fontStyle: 'italic' }}>
+                    * Top-performing files are pre-loaded in browser background for instant zero-buffering playback
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* Main Grid: History Cards on left, Eye screenshots on right */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 20, marginBottom: 24, alignItems: 'start' }}>
+            
+            {/* Left Side: Processed Video Library Cards grouped by fidelity */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              
+              {/* Group 1: Best High-Fidelity Results */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '4px 0 2px' }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#f59e0b', letterSpacing: 0.5, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  🌟 Top-Tier 3D Results ({bestCount})
+                </span>
+                <span style={{ fontSize: 8, fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', padding: '1px 5px', borderRadius: 4 }}>
+                  🚀 Fast Caching Enabled
+                </span>
+              </div>
+
+              {bestVideos.length === 0 ? (
+                <div style={{ fontSize: 11, padding: 12, border: '1px dashed #334155', borderRadius: 8, color: '#94a3b8', textAlign: 'center' }}>
+                  {"No high-fidelity videos (Index >= 4.0) currently identified."}
+                </div>
+              ) : (
+                bestVideos.map((item) => {
+                  const isSelected = selectedHistory?.id === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedHistory(item)}
+                      style={{
+                        ...historyCardStyle,
+                        border: isSelected ? '2px solid #3ecf8e' : '1px solid #1e293b',
+                        background: isSelected ? 'rgba(62, 207, 142, 0.08)' : '#0f172a',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontWeight: 800, fontSize: 13, color: '#fff' }}>{item.title}</span>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, background: '#1e293b', padding: '2px 6px', borderRadius: 4, color: '#38bdf8' }}>
+                            {item.processing_time_sec}s conversion
+                          </span>
+                          <span style={{
+                            fontSize: 10,
+                            fontWeight: 800,
+                            background: 'rgba(245, 158, 11, 0.2)',
+                            color: '#f59e0b',
+                            padding: '2px 6px',
+                            borderRadius: 4
+                          }}>
+                            3D Index: {item.parallax_variance.toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+                      <p style={{ margin: '0 0 10px', fontSize: 11, color: '#94a3b8', lineHeight: 1.3 }}>
+                        {item.description}
+                      </p>
+                      
+                      {/* Play Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onPlayVideo(item.id, 'mesh'); }}
+                          style={{ ...actionBtnStyle, background: '#10b981' }}
+                        >
+                          <Film size={11} /> Play as 3D Mesh
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onPlayVideo(item.id, 'portal'); }}
+                          style={{ ...actionBtnStyle, background: '#3b82f6' }}
+                        >
+                          <Eye size={11} /> Play in Portal View
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+
+              {/* Group 2: Older & Low-Fidelity Archive */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '14px 0 2px' }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', letterSpacing: 0.5, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  📂 Older Runs & Standard Archive ({archivedCount})
+                </span>
+              </div>
+
+              {archivedVideos.length === 0 ? (
+                <div style={{ fontSize: 11, padding: 12, border: '1px dashed #334155', borderRadius: 8, color: '#94a3b8', textAlign: 'center' }}>
+                  Archive is empty. All videos are high-fidelity!
+                </div>
+              ) : (
+                archivedVideos.map((item) => {
+                  const isSelected = selectedHistory?.id === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedHistory(item)}
+                      style={{
+                        ...historyCardStyle,
+                        border: isSelected ? '2px solid #3ecf8e' : '1px solid #1e293b',
+                        background: isSelected ? 'rgba(62, 207, 142, 0.08)' : '#0f172a',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontWeight: 800, fontSize: 13, color: '#fff' }}>{item.title}</span>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, background: '#1e293b', padding: '2px 6px', borderRadius: 4, color: '#38bdf8' }}>
+                            {item.processing_time_sec}s conversion
+                          </span>
+                          <span style={{
+                            fontSize: 10,
+                            fontWeight: 800,
+                            background: 'rgba(239, 68, 68, 0.2)',
+                            color: '#ef4444',
+                            padding: '2px 6px',
+                            borderRadius: 4
+                          }}>
+                            3D Index: {item.parallax_variance.toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+                      <p style={{ margin: '0 0 10px', fontSize: 11, color: '#94a3b8', lineHeight: 1.3 }}>
+                        {item.description}
+                      </p>
+                      
+                      {/* Play Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onPlayVideo(item.id, 'mesh'); }}
+                          style={{ ...actionBtnStyle, background: '#10b981' }}
+                        >
+                          <Film size={11} /> Play as 3D Mesh
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onPlayVideo(item.id, 'portal'); }}
+                          style={{ ...actionBtnStyle, background: '#3b82f6' }}
+                        >
+                          <Eye size={11} /> Play in Portal View
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
 
           {/* Right Side: Eye simulated screenshots side-by-side! */}
           <div>
@@ -423,6 +585,7 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
               </div>
             )}
           </div>
+        </div>
         </div>
       ) : (
         /* Harness Resolution & Audit Log View */

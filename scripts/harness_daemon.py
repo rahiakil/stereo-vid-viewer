@@ -588,6 +588,19 @@ def monitor_loop():
 
     while True:
         try:
+            # Check if we have hit the 100 video processing limit
+            status_dict = {"history": []}
+            if STATUS_FILE.exists():
+                try:
+                    status_dict = json.loads(STATUS_FILE.read_text())
+                except Exception:
+                    pass
+            total_history = len(status_dict.get("history", []))
+            if total_history >= 100:
+                log(f"Process limit achieved: {total_history}/100 videos cataloged. Stopping daemon processing loop.")
+                time.sleep(60)
+                continue
+
             # Run clutter clearance once every 24 hours
             if time.time() - last_cleanup > 86400:
                 try:
