@@ -76,6 +76,11 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
       depth = `${BASE}media/fuarukee_depth.mp4`;
       matte = `${BASE}media/fuarukee_matte.mp4`;
       bg_target = `${BASE}media/fuarukee_bg_clean.mp4`;
+    } else if (selectedVideo === 'dancing_demo') {
+      fg = `${BASE}media/dancing_demo_rgb.mp4`;
+      depth = `${BASE}media/dancing_demo_depth.mp4`;
+      matte = `${BASE}media/dancing_demo_matte.mp4`;
+      bg_target = `${BASE}media/dancing_demo_bg_clean.mp4`;
     } else if (selectedVideo === 'cows_demo') {
       fg = `${BASE}media/cows_demo_rgb.mp4`;
       depth = `${BASE}media/cows_demo_depth.mp4`;
@@ -310,6 +315,13 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
               desc: 'Scrape benchmark showing grazing cows. Reconstructed into 3D mesh sequence with matte-bypass continuous relief.',
               badge: 'Auto Scraped',
               badgeColor: '#f59e0b',
+            },
+            {
+              id: 'dancing_demo',
+              title: 'Dancing Demo',
+              desc: 'Dynamic foreground dancers reconstructed with high-fidelity depth-mesh and empty background plate.',
+              badge: 'Auto Scraped',
+              badgeColor: '#10b981',
             },
             {
               id: 'office_demo',
