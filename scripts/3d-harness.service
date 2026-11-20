@@ -1,0 +1,17 @@
+[Unit]
+Description=3D Glasses-Free Autostereoscopic Processing & Testing Harness Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=papa
+WorkingDirectory=/home/papa/Repos/stereo-vid-viewer
+ExecStart=/home/papa/Repos/hrr-basic-one/.venv/bin/python /home/papa/Repos/stereo-vid-viewer/scripts/harness_daemon.py
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=3d-harness
+
+[Install]
+WantedBy=multi-user.target

@@ -94,6 +94,15 @@ export default function App() {
     else setPoseLabel('no face');
   }, []);
 
+  useEffect(() => {
+    (window as any).setPoseValue = (pose: HeadPose) => {
+      onHeadPose(pose);
+    };
+    return () => {
+      delete (window as any).setPoseValue;
+    };
+  }, [onHeadPose]);
+
   const togglePlay = () => {
     const s = sceneRef.current;
     if (!s) return;

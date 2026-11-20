@@ -467,8 +467,9 @@ export class StereoVideoScene {
     this.renderer.clear();
 
     if (this.mode === 'window') {
-      this.bgMat.uniforms.eye.value = 0.0;
-      this.fgMat.uniforms.eye.value = 0.0;
+      const eyeVal = this.isStereoSBS > 0.5 ? Math.max(0.0, Math.min(1.0, 1.0 - this.pose.x)) : 0.0;
+      this.bgMat.uniforms.eye.value = eyeVal;
+      this.fgMat.uniforms.eye.value = eyeVal;
       this.offAxis.applyToCamera(this.cameraL, eyeC);
       this.renderer.setViewport(0, 0, w, h);
       this.renderer.setScissorTest(false);

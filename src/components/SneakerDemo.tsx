@@ -122,6 +122,15 @@ export default function SneakerDemo() {
     else setPoseLabel('no face — move into webcam');
   }, []);
 
+  useEffect(() => {
+    (window as any).setPoseValue = (pose: HeadPose) => {
+      onHeadPose(pose);
+    };
+    return () => {
+      delete (window as any).setPoseValue;
+    };
+  }, [onHeadPose]);
+
   const togglePlay = () => {
     const s = sceneRef.current;
     if (!s) return;
