@@ -30,16 +30,24 @@ export default function App() {
   const [relief, setRelief] = useState(0.14);
   const [fgThreshold, setFgThreshold] = useState(0.55);
   const [poseLabel, setPoseLabel] = useState('—');
-  const [videoLabel, setVideoLabel] = useState('custom_stereo.mp4');
+  const [videoLabel, setVideoLabel] = useState('fuarukee_stereo.mp4');
   const [depthStatus, setDepthStatus] = useState('checking depth…');
 
   const [isStereoSBS, setIsStereoSBS] = useState(true);
-  const [portalVideo, setPortalVideo] = useState<'labubu' | 'custom'>('custom');
+  const [portalVideo, setPortalVideo] = useState<'labubu' | 'custom' | 'fuarukee'>('fuarukee');
 
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;
-    const videoUrl = portalVideo === 'labubu' ? DEFAULT_VIDEO : `${import.meta.env.BASE_URL}media/custom_stereo.mp4`;
-    const depthUrl = portalVideo === 'labubu' ? DEFAULT_DEPTH : `${import.meta.env.BASE_URL}media/custom_depth.mp4`;
+    
+    let videoUrl = DEFAULT_VIDEO;
+    let depthUrl = DEFAULT_DEPTH;
+    if (portalVideo === 'custom') {
+      videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4`;
+      depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4`;
+    } else if (portalVideo === 'fuarukee') {
+      videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4`;
+      depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4`;
+    }
 
     const scene = new StereoVideoScene(mountRef.current, videoUrl, DEFAULT_CAL, null);
     sceneRef.current = scene;
@@ -273,14 +281,14 @@ export default function App() {
                 Input video is Side-by-Side (Stereo)
               </label>
             </div>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8, fontSize: 11, color: '#8fa3b8', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 8, fontSize: 11, color: '#8fa3b8', alignItems: 'center', flexWrap: 'wrap' }}>
               <span>Source:</span>
               <button
                 type="button"
-                onClick={() => { setPortalVideo('labubu'); setIsStereoSBS(false); }}
-                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'labubu' ? '#5b9fd4' : '#1c2836' }}
+                onClick={() => { setPortalVideo('fuarukee'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'fuarukee' ? '#e0c068' : '#1c2836', color: portalVideo === 'fuarukee' ? '#000' : '#fff' }}
               >
-                Labubu
+                Fuarukee
               </button>
               <button
                 type="button"
@@ -288,6 +296,13 @@ export default function App() {
                 style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'custom' ? '#5b9fd4' : '#1c2836' }}
               >
                 My SBS
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPortalVideo('labubu'); setIsStereoSBS(false); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'labubu' ? '#3ecf8e' : '#1c2836' }}
+              >
+                Labubu
               </button>
             </div>
             <label style={{ display: 'block', marginBottom: 6 }}>

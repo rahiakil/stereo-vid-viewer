@@ -40,18 +40,30 @@ export default function SneakerDemo() {
   const [showInspector, setShowInspector] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showCamera, setShowCamera] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom'>('custom');
+  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee'>('fuarukee');
 
   useEffect(() => {
     if (!mountRef.current) return;
     let cancelled = false;
     let scene: DepthMeshScene | null = null;
 
-    const fg = selectedVideo === 'labubu' ? FG_VIDEO : `${BASE}media/custom_rgb.mp4`;
-    const depth = selectedVideo === 'labubu' ? DEPTH_VIDEO : `${BASE}media/custom_depth.mp4`;
-    const matte = selectedVideo === 'labubu' ? MATTE_VIDEO : `${BASE}media/custom_matte.mp4`;
+    let fg = FG_VIDEO;
+    let depth = DEPTH_VIDEO;
+    let matte = MATTE_VIDEO;
+    let bg_target = BG_VIDEO;
+
+    if (selectedVideo === 'custom') {
+      fg = `${BASE}media/custom_rgb.mp4`;
+      depth = `${BASE}media/custom_depth.mp4`;
+      matte = `${BASE}media/custom_matte.mp4`;
+      bg_target = `${BASE}media/custom_bg_clean.mp4`;
+    } else if (selectedVideo === 'fuarukee') {
+      fg = `${BASE}media/fuarukee_rgb.mp4`;
+      depth = `${BASE}media/fuarukee_depth.mp4`;
+      matte = `${BASE}media/fuarukee_matte.mp4`;
+      bg_target = `${BASE}media/fuarukee_bg_clean.mp4`;
+    }
     const bg_default = fg;
-    const bg_target = selectedVideo === 'labubu' ? BG_VIDEO : `${BASE}media/custom_bg_clean.mp4`;
 
     void (async () => {
       const mount = mountRef.current;
@@ -222,9 +234,16 @@ export default function SneakerDemo() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
           {[
             {
+              id: 'fuarukee',
+              title: 'Fuarukee POV',
+              desc: 'Your brand new stereoscopic POV video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
+              badge: 'New Custom SBS',
+              badgeColor: '#e0c068',
+            },
+            {
               id: 'custom',
-              title: 'My Custom Video',
-              desc: 'Your stereoscopic video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
+              title: 'First Custom Video',
+              desc: 'Your first processed stereoscopic video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
               badge: 'Custom SBS',
               badgeColor: '#5b9fd4',
             },
@@ -240,12 +259,12 @@ export default function SneakerDemo() {
             return (
               <div
                 key={item.id}
-                onClick={() => setSelectedVideo(item.id as 'labubu' | 'custom')}
+                onClick={() => setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee')}
                 style={{
                   padding: '10px 12px',
                   borderRadius: 8,
-                  border: isSelected ? '2px solid #5b9fd4' : '1px solid #2a3848',
-                  background: isSelected ? 'rgba(91,159,212,0.15)' : '#1c2836',
+                  border: isSelected ? `2px solid ${item.badgeColor}` : '1px solid #2a3848',
+                  background: isSelected ? `${item.badgeColor}25` : '#1c2836',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   position: 'relative',
