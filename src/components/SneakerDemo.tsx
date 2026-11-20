@@ -40,7 +40,7 @@ export default function SneakerDemo() {
   const [showInspector, setShowInspector] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showCamera, setShowCamera] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee'>('fuarukee');
+  const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo'>('fuarukee');
   const [useMatte, setUseMatte] = useState(false);
 
   useEffect(() => {
@@ -71,6 +71,11 @@ export default function SneakerDemo() {
       depth = `${BASE}media/fuarukee_depth.mp4`;
       matte = `${BASE}media/fuarukee_matte.mp4`;
       bg_target = `${BASE}media/fuarukee_bg_clean.mp4`;
+    } else if (selectedVideo === 'office_demo') {
+      fg = `${BASE}media/office_demo_rgb.mp4`;
+      depth = `${BASE}media/office_demo_depth.mp4`;
+      matte = `${BASE}media/office_demo_matte.mp4`;
+      bg_target = `${BASE}media/office_demo_bg_clean.mp4`;
     }
     const bg_default = fg;
 
@@ -253,6 +258,13 @@ export default function SneakerDemo() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
           {[
             {
+              id: 'office_demo',
+              title: 'Office Demo',
+              desc: 'Processed stereoscopic video 'office_demo'. Left eye view reconstructed into 3D mesh with empty in-painted background.',
+              badge: 'Auto Processed',
+              badgeColor: '#a78bfa',
+            },
+            {
               id: 'fuarukee',
               title: 'Fuarukee POV',
               desc: 'Your brand new stereoscopic POV video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
@@ -278,7 +290,7 @@ export default function SneakerDemo() {
             return (
               <div
                 key={item.id}
-                onClick={() => setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee')}
+                onClick={() => setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee' | 'office_demo')}
                 style={{
                   padding: '10px 12px',
                   borderRadius: 8,
