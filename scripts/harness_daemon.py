@@ -547,11 +547,26 @@ async def run_playwright_test(vid_id: str, meta: dict) -> dict:
     return final_metrics
 
 
-def push_to_remote():
+def push_to_remote(vid_id: str | None = None):
     log("Committing and pushing new assets live...")
-    run_cmd(["git", "add", "-f", "public/media/*"])
+    if vid_id:
+        # Explicitly force-add only the generated assets for this specific video
+        # plus the global dashboard status file, ensuring we never track heavy experimental garbage
+        run_cmd(["git", "add", "-f", f"public/media/{vid_id}_rgb.mp4"])
+        run_cmd(["git", "add", "-f", f"public/media/{vid_id}_stereo.mp4"])
+        run_cmd(["git", "add", "-f", f"public/media/{vid_id}_depth.mp4"])
+        run_cmd(["git", "add", "-f", f"public/media/{vid_id}_matte.mp4"])
+        run_cmd(["git", "add", "-f", f"public/media/{vid_id}_bg_clean.mp4"])
+        run_cmd(["git", "add", "-f", f"public/media/dashboard/{vid_id}_report.json"])
+        run_cmd(["git", f"add", "-f", f"public/media/dashboard/{vid_id}_left.png"])
+        run_cmd(["git", "add", "-f", f"public/media/dashboard/{vid_id}_right.png"])
+        run_cmd(["git", "add", "-f", "public/media/dashboard/status.json"])
+    else:
+        # Fallback if no specific ID is provided (e.g., global status changes)
+        run_cmd(["git", "add", "-f", "public/media/dashboard/status.json"])
+
     run_cmd(["git", "add", "src/App.tsx", "src/components/SneakerDemo.tsx"])
-    run_cmd(["git", "commit", "-m", "Automated processed video addition & evolutionary fidelity optimization"])
+    run_cmd(["git", "commit", "-m", f"Automated processed video addition & evolutionary fidelity optimization for {vid_id}" if vid_id else "Automated daemon update"])
     run_cmd(["git", "push", "origin", "main"])
     log("Pushed successfully! Live deploy triggered.")
 
@@ -637,7 +652,7 @@ def monitor_loop():
                     # Run testing suite
                     asyncio.run(run_playwright_test(meta["id"], meta))
                     # Push live
-                    push_to_remote()
+                    push_to_remote(meta["id"])
                 # Delete from queue once fully processed
                 if target.exists():
                     target.unlink()

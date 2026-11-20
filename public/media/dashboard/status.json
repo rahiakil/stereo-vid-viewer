@@ -1,17 +1,11 @@
 {
   "system": {
-    "cpu_usage_pct": 88.1,
-    "memory_usage_pct": 40.2,
+    "cpu_usage_pct": 78.5,
+    "memory_usage_pct": 39.3,
     "avg_processing_time_sec": 85.0,
     "total_processed": 6
   },
-  "queue": [
-    {
-      "name": "seal_demo.mp4",
-      "status": "pending",
-      "progress": 0
-    }
-  ],
+  "queue": [],
   "history": [
     {
       "id": "seal_demo",
