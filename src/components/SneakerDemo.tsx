@@ -325,6 +325,25 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {isSweeping ? ' Stop Sweep' : ' Simulate Head Sweep'}
           </button>
         </div>
+
+        {/* Investor Tip / Showcase Highlight */}
+        <div style={{
+          background: 'rgba(245, 158, 11, 0.08)',
+          border: '1px solid rgba(245, 158, 11, 0.3)',
+          borderRadius: 8,
+          padding: '10px 12px',
+          marginBottom: 12,
+          fontSize: 11,
+          lineHeight: 1.4,
+          color: '#cbd5e1'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#f59e0b', fontWeight: 'bold', marginBottom: 4 }}>
+            <span>💎</span>
+            <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>Investor Showcase Guide</span>
+          </div>
+          Select the <strong style={{ color: '#fff' }}>"Fuarukee POV"</strong> video below (real dual-lens stereoscopic capture) and click <strong style={{ color: '#38bdf8' }}>"Simulate Head Sweep"</strong> above. This demonstrates the physical "window portal" look-around illusion with zero synthetic estimation noise.
+        </div>
+
         <div style={{ color: '#8fa3b8', fontSize: 10, marginBottom: 8 }}>PROCESSED VIDEO LIBRARY (BY PIPELINE CLASS)</div>
         
         {/* Category Filters */}
@@ -361,6 +380,14 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
           {[
+            {
+              id: 'fuarukee',
+              title: '⭐ Fuarukee POV',
+              class: 'Class B',
+              desc: 'Premium dual-lens physical stereoscopic capture. Exhibits zero depth estimation noise. Flawless window-look-around.',
+              badge: '💎 INVESTOR FAV',
+              badgeColor: '#f59e0b',
+            },
             {
               id: 'svd_0001',
               title: 'SVD Spatial Video',
@@ -400,14 +427,6 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
               desc: 'Processed stereoscopic video "office_demo". Left eye view reconstructed into 3D mesh with empty in-painted background.',
               badge: 'Auto Processed',
               badgeColor: '#a78bfa',
-            },
-            {
-              id: 'fuarukee',
-              title: 'Fuarukee POV',
-              class: 'Class B',
-              desc: 'Your brand new stereoscopic POV video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
-              badge: 'New Custom SBS',
-              badgeColor: '#e0c068',
             },
             {
               id: 'custom',
