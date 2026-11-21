@@ -1,0 +1,120 @@
+================================================================================
+3D GLASSES-FREE AUTOSTEREOSCOPIC PIPELINE: CORE ALGORITHMS & QUALITY MARKERS
+================================================================================
+Research Date: November 21, 2026
+Repository: https://github.com/rahiakil/stereo-vid-viewer
+Local Path: /home/papa/Repos/stereo-vid-viewer
+
+This document details the architectural design, mathematical evaluation metrics,
+and processing algorithms used in our 2D-to-3D Monocular Look-Around WebGL Suite.
+
+--------------------------------------------------------------------------------
+1. CORE ARCHITECTURAL PIPELINE (STAGE-BY-STAGE)
+--------------------------------------------------------------------------------
+Standard monocular or Side-by-Side (SBS) videos are converted into an interactive
+WebGL Look-Around Portal by executing the following backend Python scripts:
+
+STAGE A: INGESTION & DEMUXING (FFmpeg 7.x)
+- Apple Spatial Videos (MV-HEVC) contain multiple video layers inside a single HEVC
+  stream. We use FFmpeg's modern view specifiers to split the views into discrete
+  Left and Right eye streams without quality-loss transcoding:
+  `ffmpeg -i input.mov -an -map 0:v:view:0 left.mp4 -map 0:v:view:1 right.mp4`
+- Standard packed Side-by-Side (SBS) videos are cropped down the middle to isolate
+  the reference monocular left-eye feed.
+
+STAGE B: DENSE GEOMETRIC ESTIMATION (Depth Anything V2)
+- Script: `scripts/estimate_depth_video.py`
+- Model: Depth-Anything-V2-Small-hf (Transformer-based)
+- Role: Estimates dense distance coordinates for every pixel in every frame. 
+  Generates a grayscale depth map video stream (`{name}_depth.mp4`). Brighter 
+  pixels represent closer objects (inverted metric depth).
+
+STAGE C: FOREGROUND ISOLATION & MATTING (u2net / BiRefNet)
+- Script: `scripts/matte_video_rembg.py`
+- Model: U2-Net / birefnet-general
+- Role: Matting networks predict per-pixel transparency (alpha opacity). This 
+  separates moving foreground subjects from complex backgrounds, preventing edge
+  halos, static dust, and background "dragging" artifacts. Outputs `{name}_matte.mp4`.
+
+STAGE D: AI OCCLUSION INPAINTING (LaMa)
+- Script: `scripts/inpaint_background_lama.py`
+- Model: LaMa (Resolution-Weighted Inpainting)
+- Role: When the user shifts their head, camera perspective sweeps behind the 3D
+  foreground mesh. To prevent black "holes" (occlusions), the matte is expanded 
+  (dilated by ~28px) and LaMa AI-fills the missing background plate, producing a 
+  clean static/moving backdrop (`{name}_bg_clean.mp4`).
+
+STAGE E: NOVEL VIEWPOINT LIGHT-FIELD SYNTHESIS (DIBR)
+- Script: `scripts/synthesize_multiview.py`
+- Role: Depth-Image-Based Rendering (DIBR). Warps the reference RGB image across
+  a 5x3 (15-camera) virtual lightfield grid from far-left to far-right. Saves
+  frames dynamically to support webcam head-tracked viewport blending without
+  GPU-intensive rendering overhead.
+
+--------------------------------------------------------------------------------
+2. PROGRAMMATIC EVALUATION CRITERIA (HOW WE MEASURE QUALITY)
+--------------------------------------------------------------------------------
+To audit conversion quality without human visual inspection, the background 
+daemon runs a Closed-Loop Computer Vision Feedback Audit in a headless browser:
+
+A. PARALLAX DISPARITY VARIANCE (3D INDEX SCORE)
+- The browser places head coordinates at extreme left (x=0.15) and right (x=0.85).
+- It takes viewport screenshots and computes the Mean Absolute Difference (MAD):
+
+  V = (1 / (w * h)) * Sum_x Sum_y | I_left(x,y) - I_right(x,y) |
+
+  Where:
+  - I_left/I_right are pixel luminance at (x,y) for simulated eye poses.
+  - w, h are screenshot dimensions (1280 x 720).
+
+B. THE WARP-TOLERANT CLIPPING SAFEGUARD
+- Setting the 3D relief too high causes the WebGL mesh to rip or display jagged 
+  vertical "webbing" lines. This artificially inflates the MAD difference score.
+- The optimization loop tests multiple relief coordinates ([0.08, 0.16, 0.26]) 
+  and chooses the maximum value that keeps the 3D Index strictly below a warp
+  ceiling of 10.0, ensuring a clean, physically plausible 3D pop-out.
+
+C. GRADING SCALES
+- Spectacular (Score >= 4.0): Distinct horizontal depth volume, clean contours.
+- Standard (Score 1.5 to 3.9): Comfortable 3D depth, minor boundary dragging.
+- Minimal/Flat (Score < 1.5): No active off-axis displacement (e.g. failed assets).
+
+--------------------------------------------------------------------------------
+3. LIVE WEBGL RENDERING & VIEWPORT COUPLING
+--------------------------------------------------------------------------------
+When loaded, the React + Vite frontend executes interactive WebGL projection:
+
+A. ASYMMETRIC PERSPECTIVE FRUSTUM (Off-Axis Camera)
+- MediaPipe or FaceTracker detects front-facing eye/face coordinates (pose.x, pose.y).
+- The camera's perspective projection matrix is sheared asymmetrically:
+  `camera.projectionMatrix.makePerspective(left, right, top, bottom, near, far)`
+-Nearer displaced vertices in the WebGL mesh pop forward, while the background remains
+  static, mimicking a real physical look-around window.
+
+B. WEBCAM-FREE REMOTE DESKTOP PARALLAX SIMULATOR
+- For Remote Desktop sessions lacking webcam access, the dashboard auto-detects
+  localhost and renders a high-precision pose slider. Dragging this slider
+  publishes mock head positions (`window.setPoseValue()`) to sweep camera angles
+  interactively.
+
+C. INSTANT WEBG-ZOOM & FIT-TO-SCREEN MATRIX SCALING
+- Allows the user to instantly adjust the camera crop or zoom from 0.5x to 2.5x.
+- Built to handle portrait crops and close-ups (such as the Dancing Demo) by
+  multiplying WebGL scale vectors in real-time without refreshing:
+  `this.fgMesh.scale.set(z, z, z);`
+
+--------------------------------------------------------------------------------
+4. BENCHMARK PERFORMANCE TELEMETRY
+--------------------------------------------------------------------------------
+Our current 7 processed videos yield the following performance metrics:
+
+1. SVD Spatial Video  : Score 5.25 | Relief 0.16 | iPhone 16 Pro MV-HEVC Spatial Ingestion
+2. First Custom Video : Score 6.14 | Relief 0.16 | Comfort depth; clean separation
+3. Fuarukee POV       : Score 5.82 | Relief 0.08 | Comfortable landscape focal scaling
+4. Labubu Toy Walk    : Score 4.95 | Relief 0.16 | Original store-aisle walkthrough
+5. Seal Demo          : Score 4.51 | Relief 0.08 | Continuous organic depth maps
+6. Cows Demo          : Score 0.47 | Relief 0.08 | Flat field; low-contrast matting
+7. Dancing Demo       : Score 0.00 | Relief 0.16 | Fragmented matte; face-only crop
+
+================================================================================
+EOF
