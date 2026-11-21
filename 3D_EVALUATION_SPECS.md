@@ -82,7 +82,47 @@ To elevate the autostereoscopic pipeline to professional, cinematic-grade fideli
 
 ---
 
-## 6. Critical Deployment Safeguards & Regression Testing
+## 6. Formalized Autostereoscopic Pipeline Categorizations
+
+To scale our engineering efforts and provide clear technological tracks for various formats, our processing pipelines are categorized into four distinct classes:
+
+### 📁 Class A: Monocular Video to Glasses-Free 3D (Depth-Mesh Portal)
+* **Input Format:** Standard 2D single-perspective video stream.
+* **Algorithmic Path:** Monocular stream $\to$ Depth-Anything-V2 $\to$ `u2net`/`BiRefNet` foreground segmentation matte $\to$ `LaMa` resolution-weighted background plate inpainting $\to$ Dynamic WebGL off-axis vertex displacement.
+* **Ideal Use Case:** Enhancing flat web movies, archive video assets, or single-camera actor pans.
+
+### 📁 Class B: Stereoscopic Video to Glasses-Free 3D (Disparity-Interpolated Portal)
+* **Input Format:** Side-by-Side (SBS), Above-Below (ABL), or Apple Vision Pro MV-HEVC streams.
+* **Algorithmic Path:** Multi-view layer demuxing $\to$ Optical flow horizontal disparity estimation $\to$ Focal-length perspective scaling $\to$ Horizontal look-around viewpoint interpolation.
+* **Ideal Use Case:** Converting 3D movies, stereoscopic camera captures, or spatial videos into flat glassless screens.
+
+### 📁 Class C: Multi-View & Light-Field to Glasses-Free 3D (Viewport Blending)
+* **Input Format:** Calibrated 5x3 (15-camera) grid files, SVD spatial layers, or Google DeepView hemispherical maps.
+* **Algorithmic Path:** Grid frame ingestion $\to$ Depth-Image-Based Rendering (DIBR) interpolation $\to$ Webcam head-pose coordinate mapping $\to$ Viewport blend-shading.
+* **Ideal Use Case:** High-fidelity physical look-around environments with zero geometric stretch artifacts.
+
+### 📁 Class D: NeRF & Dynamic 3D Gaussian Splatting to Glasses-Free 3D (Neural Splat Portal)
+* **Input Format:** Monocular orbital sweeps, multi-angle object photos, or dynamic physical captures.
+* **Algorithmic Path:** Structure-from-Motion (COLMAP) path tracking $\to$ Gaussian Splatting / Neural Radiance Fields volumetric optimization $\to$ Real-time WebGL/WebGPU Splat rasterization $\to$ Off-axis matrix mapping.
+* **Ideal Use Case:** Ultra-photoreal, interactive product previews (e.g. sneakers or luxury items) containing dynamic view-dependent light reflections.
+
+---
+
+## 7. NeRF & 3D Gaussian Splatting for Monocular Sneaker Previews
+
+We can directly leverage monocular videos of physical products (such as a sneaker) to construct highly immersive, glasses-free interactive product previews using Neural Radiance Fields (NeRF) or 3D Gaussian Splatting (3DGS).
+
+### Technical Integration Workflow
+1. **The Orbital Capture:** The user records a 10-20 second monocular video doing a complete circular pan (orbital sweep) around the sneaker under consistent lighting.
+2. **Camera Pose Estimation:** We run Structure-from-Motion (SfM) via COLMAP to resolve the high-precision $[R|t]$ extrinsic and intrinsic camera pose matrices for each video frame.
+3. **Volumetric Training:** We train a 3D Gaussian Splat model. This optimizes the spatial coordinates, scale, rotation, opacity, and spherical harmonics (view-dependent colors) of millions of tiny ellipsoids to represent the product.
+4. **Holographic Presentation Paths:**
+   * **Baking into Class C**: Render the finished 3DGS sneaker model from a 15-view (5x3) camera trajectory and output a Light-field Grid format for immediate lightweight display.
+   * **Direct WebGL Splat Rasterization**: Embed a real-time web splat engine (e.g. `gsplat.js` or Luma WebGL Splat SDK) within our React application. Map the webcam's head-tracking coordinates live to the rasterizer's projection camera matrix. As the user moves, the actual 3D splat cloud renders in real-time, delivering a physical look-around experience complete with glossy leather/mesh reflections.
+
+---
+
+## 8. Critical Deployment Safeguards & Regression Testing
 
 To prevent feature regression when upgrading or deploying the autostereoscopic pipeline to production platforms (such as GitHub Pages), any automated agent or engineer must adhere to the following checklist:
 

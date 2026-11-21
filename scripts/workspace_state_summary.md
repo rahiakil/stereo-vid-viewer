@@ -63,7 +63,43 @@ An automated clutter clearance function runs every time the daemon boots and onc
 
 ---
 
-## 5. Critical Deployment Safeguards & Regression Testing
+## 5. Formalized Autostereoscopic Pipeline Categorizations
+
+To systematically scale our conversion and integration workflows, all active project streams are grouped into four standardized technological categories:
+
+### 📁 Class A: Monocular Video to Glasses-Free 3D (Depth-Mesh Portal)
+* **Description:** Generates interactive 3D structures from flat, single-perspective 2D videos (e.g. YouTube uploads or flat media).
+* **Stack:** Monocular 2D Source $\to$ Depth-Anything-V2 Disparity Map $\to$ `u2net`/`BiRefNet` Foreground Matting $\to$ `LaMa` Background Plate Inpainting $\to$ WebGL vertex-displacement matrix shearing.
+
+### 📁 Class B: Stereoscopic Video to Glasses-Free 3D (Disparity-Interpolated Portal)
+* **Description:** Transforms stereoscopic dual-camera streams (e.g., SBS, TAB, or modern Apple Spatial formats) into glasses-free 3D window volumes.
+* **Stack:** View-layer Demuxing $\to$ Optical Flow horizontal disparity indexing $\to$ Focal-length perspective tracking $\to$ Head-pose horizontal viewport viewpoint morphing.
+
+### 📁 Class C: Multi-View & Light-Field to Glasses-Free 3D (Viewport Blending)
+* **Description:** Supports real-time multi-angle physical perspectives (e.g. 15-view 5x3 grids or calibrated multi-camera directories) with zero stretching artifacts.
+* **Stack:** Calibrated Grid Ingestion $\to$ Depth-Image-Based Rendering (DIBR) virtual viewpoint generation $\to$ Face-tracker linear interpolation blending.
+
+### 📁 Class D: NeRF & Dynamic 3D Gaussian Splatting to Glasses-Free 3D (Neural Splat Portal)
+* **Description:** Produces ultra-photorealistic volumetric assets of complex physical products (like sneakers or toys) featuring physical, view-dependent gloss, specular reflections, and perfect shapes.
+* **Stack:** Circular camera orbit sweeps $\to$ COLMAP Structure-from-Motion $\to$ 3DGS ellipsoid / NeRF coordinate field training $\to$ Live WebGL/WebGPU Splat rendering coupled with head-tracking off-axis projection.
+
+---
+
+## 6. NeRF & 3D Gaussian Splatting for Monocular Sneaker Previews
+
+We can directly utilize standard, monocular circular sweeping videos (orbital pans) to construct pristine, interactive 3D product previews (e.g., our sneaker demo) using Neural Radiance Fields (NeRF) or 3D Gaussian Splatting (3DGS).
+
+### Technical Integration Workflow
+1. **Orbital Capture:** Record a short 10-20 second monocular video doing a slow, continuous circular orbit around the physical product (e.g., a sneaker).
+2. **Camera Coordinate Solving:** Run COLMAP Structure-from-Motion (SfM) to resolve the high-precision $[R|t]$ camera matrices (intrinsics and extrinsics) for each video frame.
+3. **Volumetric Representation Optimization (3DGS):** Optimize the spatial position, scale, rotation, opacity, and view-dependent color harmonics of millions of 3D Gaussian ellipsoids to represent the object.
+4. **Holographic Presentation Paths:**
+   * **Baking into Class C (Lightfield)**: Render the finished 3DGS model from a 15-view (5x3) camera trajectory, bake into a multi-view grid layout, and load it directly into our fast-caching MultiViewPlayer component.
+   * **Real-time WebGL/WebGPU Splat Rasterizer**: Embed a live web-based Splat renderer (e.g., `gsplat.js` or Luma Splat SDK) directly within our React application. Map the webcam head-tracking coordinates in real-time to the rasterizer's viewpoint projection matrix. As the user sweeps their head, they will see the actual 3D splat cloud move, displaying true view-dependent leather gloss and mesh specular reflections under a glasses-free autostereoscopic portal!
+
+---
+
+## 7. Critical Deployment Safeguards & Regression Testing
 
 Whenever deploying a new build (via `npm run build` or pushing to `main` for GitHub Pages deployment), future agents/developers must verify that **no core interactive features or navigation assets are regressed or removed**.
 

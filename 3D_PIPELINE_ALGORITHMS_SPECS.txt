@@ -116,5 +116,72 @@ Our current 7 processed videos yield the following performance metrics:
 6. Cows Demo          : Score 0.47 | Relief 0.08 | Flat field; low-contrast matting
 7. Dancing Demo       : Score 0.00 | Relief 0.16 | Fragmented matte; face-only crop
 
+--------------------------------------------------------------------------------
+5. FORMALIZED AUTOSTEREOSCOPIC PIPELINE CATEGORIZATIONS
+--------------------------------------------------------------------------------
+To establish rigorous architectural benchmarks, our processing pathways are
+categorized into four distinct technological classes:
+
+CLASS A: MONOCULAR VIDEO TO GLASSES-FREE 3D (DEPTH-MESH PORTAL)
+- Input: Standard 2D single-view video stream (e.g., `.mp4`).
+- Pipeline: Monocular input -> Depth-Anything-V2 depth extraction -> u2net/BiRefNet
+  subject matting -> LaMa background inpainting -> WebGL dynamic displacement.
+- Outcome: Deforms a 2D plane into a 3D mesh inside a virtual look-around viewport.
+
+CLASS B: STEREOSCOPIC VIDEO TO GLASSES-FREE 3D (DISPARITY-INTERPOLATED PORTAL)
+- Input: Side-by-Side (SBS), Above-Below (ABL), or iPhone MV-HEVC streams.
+- Pipeline: Split dual views -> Optical flow disparity estimation -> Viewport
+  focal scaling -> Horizontal look-around coordinate morphing.
+- Outcome: Synthesizes new left-right eye perspectives based on head position,
+  eliminating 3D eyewear requirements.
+
+CLASS C: MULTI-VIEW & LIGHT-FIELD TO GLASSES-FREE 3D (VIEWPORT BLENDING)
+- Input: 5x3 camera grids, Google DeepView sequences, or SVD spatial directories.
+- Pipeline: Multi-angle ingestion -> Depth-Image-Based Rendering (DIBR) -> WebGL
+  quad mapping -> Webcam head-pose viewport blending.
+- Outcome: Delivers multiple physical angles of a scene with zero geometric warping.
+
+CLASS D: NeRF & DYNAMIC 3D GAUSSIAN SPLATTING TO GLASSES-FREE 3D (NEURAL PORTAL)
+- Input: Monocular orbital sweeps, multi-angle object photos, or dynamic captures.
+- Pipeline: Structure-from-Motion (COLMAP) camera tracking -> Gaussian Splatting/
+  NeRF volume optimization -> Real-time Splat rasterization -> Off-axis matrix.
+- Outcome: Delivers photo-real, volumetric 3D look-around previews of complex items
+  (such as sneakers or products) with true view-dependent reflections and zero mesh tearing.
+
+--------------------------------------------------------------------------------
+6. NeRF & 3D GAUSSIAN SPLATTING FOR MONOCULAR SNEAKER PREVIEWS
+--------------------------------------------------------------------------------
+Yes! We can utilize monocular videos to construct rich 3D Gaussian Splatting (3DGS)
+and Neural Radiance Fields (NeRF) data for high-fidelity sneaker previews. 
+
+THE WORKFLOW ROADMAP FOR GLASSES-FREE PRODUCT PORTALS:
+
+1. MONOCULAR INPUT INGESTION (THE ORBITAL PAN)
+- Capture a simple 10-20 second monocular video panning around the sneaker in a 
+  consistent circular/orbital trajectory with high overlap between adjacent frames.
+
+2. CAMERA POSE RESOLUTION (Structure-from-Motion)
+- Run COLMAP or utilize cloud-based NeRF/3DGS engines (e.g., Luma AI, Polycam,
+  or nerfstudio) to extract high-precision intrinsic and extrinsic camera pose 
+  matrices [R | t] for each frame of the monocular sweep.
+
+3. VOLUMETRIC & DYNAMIC REPRESENTATION OPTIMIZATION
+- **3D Gaussian Splatting (3DGS)**: Optimizes millions of 3D ellipsoids (defined 
+  by positions x, scales s, rotations r, opacities o, and spherical harmonics
+  coefficients for view-dependent color).
+- **Dynamic 3DGS**: For moving products, optimizes deformation fields over time,
+  yielding dynamic movement capabilities.
+
+4. AUTOHOLOGRAPHIC VIEWPORT COUPLING
+- **Baking to Class C (Lightfield Grid)**: Render the optimized 3DGS model from
+  a 15-view (5x3) camera grid and export as a multi-view layout, loading it
+  instantly in our MultiViewPlayer component.
+- **Direct WebGL Splat Rasterization**: Integrate a real-time web-splat viewer
+  (such as `gsplat.js` or Luma's WebGL Splat renderer) into the React app. 
+- Map the webcam face-tracker coordinates directly to the splat camera's projection 
+  and view matrices (using off-axis frustum formulas), rendering the actual 3D 
+  splat cloud on screen. This provides flawless glasses-free 3D product previews 
+  with real, physical, view-dependent light reflections!
+
 ================================================================================
 EOF
