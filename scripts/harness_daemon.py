@@ -206,6 +206,24 @@ def get_video_duration(path: Path) -> float:
         return 0.0
 
 
+def ensure_h264_compatibility(file_path: Path):
+    """Transcodes an MPEG4 video to H264 for universal browser compatibility."""
+    if not file_path.exists():
+        return
+    log(f"Running web-compatible H264 transcode for: {file_path.name}")
+    temp_path = file_path.with_name(f"{file_path.stem}_h264_temp.mp4")
+    cmd = [
+        "ffmpeg", "-y", "-i", str(file_path),
+        "-c:v", "libx264", "-pix_fmt", "yuv420p",
+        "-preset", "fast", str(temp_path)
+    ]
+    if run_cmd(cmd):
+        temp_path.replace(file_path)
+        log(f"Successfully transcoded {file_path.name} to standard H264 AVC.")
+    else:
+        log(f"Warning: Failed to transcode {file_path.name} to H264.")
+
+
 def process_video(path: Path) -> dict | None:
     """Run full AI extraction pipeline on SBS video."""
     name = path.stem.lower().replace(" ", "_").replace("-", "_")
@@ -254,6 +272,7 @@ def process_video(path: Path) -> dict | None:
         "--input", str(rgb), "--output", str(depth)
     ])
     if not s3: return None
+    ensure_h264_compatibility(depth)
 
     # Step 4: Run rembg Matting
     report_progress("Generating foreground mask via rembg (u2net)", 75)
@@ -262,6 +281,7 @@ def process_video(path: Path) -> dict | None:
         "--input", str(rgb), "--output", str(matte), "--model", "u2net"
     ])
     if not s4: return None
+    ensure_h264_compatibility(matte)
 
     # Step 5: Run LaMa Inpainting Background Clean
     report_progress("Inpainting empty background plate via LaMa", 90)
@@ -271,6 +291,7 @@ def process_video(path: Path) -> dict | None:
         "--max-side", "640"
     ])
     if not s5: return None
+    ensure_h264_compatibility(bg_clean)
 
     duration = round(time.time() - start_time, 1)
     log(f"All AI streams successfully generated for {name} in {duration}s!")

@@ -48,6 +48,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
   const [selectedVideo, setSelectedVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | 'cows_demo' | string>(defaultVideo || 'fuarukee');
   const [useMatte, setUseMatte] = useState(false);
   const [isSweeping, setIsSweeping] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<'All' | 'Class A' | 'Class B' | 'Class D'>('All');
 
   useEffect(() => {
     if (defaultVideo) {
@@ -324,12 +325,46 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {isSweeping ? ' Stop Sweep' : ' Simulate Head Sweep'}
           </button>
         </div>
-        <div style={{ color: '#8fa3b8', fontSize: 10, marginBottom: 8 }}>PROCESSED VIDEO LIBRARY</div>
+        <div style={{ color: '#8fa3b8', fontSize: 10, marginBottom: 8 }}>PROCESSED VIDEO LIBRARY (BY PIPELINE CLASS)</div>
+        
+        {/* Category Filters */}
+        <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
+          {[
+            { id: 'All', label: 'All' },
+            { id: 'Class A', label: 'Class A (Mono)' },
+            { id: 'Class B', label: 'Class B (Stereo)' },
+            { id: 'Class D', label: 'Class D (Splat)' }
+          ].map((tab) => {
+            const isTabSelected = categoryFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setCategoryFilter(tab.id as any)}
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  border: isTabSelected ? '1px solid #38bdf8' : '1px solid #2a3848',
+                  background: isTabSelected ? '#38bdf8' : '#1c2836',
+                  color: isTabSelected ? '#000' : '#8fa3b8',
+                  transition: 'all 0.1s ease',
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
           {[
             {
               id: 'svd_0001',
               title: 'SVD Spatial Video',
+              class: 'Class B',
               desc: 'Premium iPhone 16 Pro spatial video (MV-HEVC) demuxed and processed into beautiful depth-mesh Look-around.',
               badge: 'iPhone 16 Pro',
               badgeColor: '#ec4899',
@@ -337,6 +372,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {
               id: 'cows_demo',
               title: 'Cows Demo',
+              class: 'Class A',
               desc: 'Scrape benchmark showing grazing cows. Reconstructed into 3D mesh sequence with matte-bypass continuous relief.',
               badge: 'Auto Scraped',
               badgeColor: '#f59e0b',
@@ -344,6 +380,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {
               id: 'dancing_demo',
               title: 'Dancing Demo',
+              class: 'Class A',
               desc: 'Dynamic foreground dancers reconstructed with high-fidelity depth-mesh and empty background plate.',
               badge: 'Auto Scraped',
               badgeColor: '#10b981',
@@ -351,6 +388,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {
               id: 'seal_demo',
               title: 'Seal Demo',
+              class: 'Class A',
               desc: 'Underwater seal swimming. Reconstructed into continuous, flowing autostereoscopic mesh.',
               badge: 'Auto Scraped',
               badgeColor: '#3b82f6',
@@ -358,6 +396,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {
               id: 'office_demo',
               title: 'Office Demo',
+              class: 'Class B',
               desc: 'Processed stereoscopic video "office_demo". Left eye view reconstructed into 3D mesh with empty in-painted background.',
               badge: 'Auto Processed',
               badgeColor: '#a78bfa',
@@ -365,6 +404,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {
               id: 'fuarukee',
               title: 'Fuarukee POV',
+              class: 'Class B',
               desc: 'Your brand new stereoscopic POV video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
               badge: 'New Custom SBS',
               badgeColor: '#e0c068',
@@ -372,6 +412,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {
               id: 'custom',
               title: 'First Custom Video',
+              class: 'Class B',
               desc: 'Your first processed stereoscopic video. Left eye view reconstructed into a 3D mesh with AI-inpainted background.',
               badge: 'Custom SBS',
               badgeColor: '#5b9fd4',
@@ -379,11 +420,13 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             {
               id: 'labubu',
               title: 'Labubu Toy Walk',
+              class: 'Class D',
               desc: 'Original demo featuring a Labubu toy walking down a high-detail store aisle.',
               badge: 'Demo',
               badgeColor: '#3ecf8e',
             },
-          ].map((item) => {
+          ].filter((item) => categoryFilter === 'All' || item.class === categoryFilter)
+           .map((item) => {
             const isSelected = selectedVideo === item.id;
             return (
               <div
