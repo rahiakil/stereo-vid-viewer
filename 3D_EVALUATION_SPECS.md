@@ -79,3 +79,13 @@ To elevate the autostereoscopic pipeline to professional, cinematic-grade fideli
 1. **Temporal Depth MAP Smoothing:** Integrate Lucas-Kanade optical flow on the depth generator output. This locks depth boundaries between consecutive frames, eliminating edge-flicker during high-speed action.
 2. **Focus-Weighted Background Inpainting:** Apply camera lens focal parameters to the background inpainting plate (`LaMa`), ensuring that background perspective shifts perfectly scale with foreground depth lines.
 3. **Adaptive Mesh Tessellation:** Subdivide WebGL geometry dynamically based on depth boundaries, allocating dense polygons to high-gradient boundaries (e.g. subject contours) while maintaining simple low-poly structures elsewhere.
+
+---
+
+## 6. Critical Deployment Safeguards & Regression Testing
+
+To prevent feature regression when upgrading or deploying the autostereoscopic pipeline to production platforms (such as GitHub Pages), any automated agent or engineer must adhere to the following checklist:
+
+1. **Verify Complete Navigability:** Before shipping, execute `npm run build` locally and verify that all dashboard control buttons and navigation tabs are active. Ensure that the sidebar layout does not compress or drop any UI elements.
+2. **Prevent "Single-Asset Locks" (Labubu Bug):** A critical bug previously caused the production environment to default to only displaying the `labubu` target video card, stripping out all selection buttons, sliders, and alternative media datasets. Ensure that all standard asset IDs are fully registered across components and rendered under the video selection catalog.
+3. **Responsive Visual Testing:** Test the page on standard mobile dimensions in the browser's responsive design mode. No control buttons, sliders, or tab selectors should be clipped or hidden by overflow parameters. Ensure all features are available across standard viewport sizes.

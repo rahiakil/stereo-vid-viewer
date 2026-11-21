@@ -60,3 +60,18 @@ An automated clutter clearance function runs every time the daemon boots and onc
 > 1. **Temporal Depth Smoothing**: How do we integrate Optical Flow (e.g. Farneback or Lucas-Kanade) into our Python depth extraction pipeline to link depth frames temporally and completely eliminate depth-mesh flicker?
 > 2. **Client-side WebGPU Acceleration**: What is the optimal architecture to compile monocular depth models (like Depth-Anything-V2-Small) into ONNX Runtime Web using WebGPU, enabling instantaneous client-side 2D-to-3D conversion directly in the mobile browser?
 > 3. **Cinema-scale Lenticular Interleaving**: How do we extend our fragment shader to support multi-view lenticular or parallax-barrier autostereoscopic displays, spatially interleaving multiple horizontal perspectives across screen subpixels so that multiple users can look around the scene simultaneously without glasses?"
+
+---
+
+## 5. Critical Deployment Safeguards & Regression Testing
+
+Whenever deploying a new build (via `npm run build` or pushing to `main` for GitHub Pages deployment), future agents/developers must verify that **no core interactive features or navigation assets are regressed or removed**.
+
+### ⚠️ Known Regression Warning
+* **The Issue**: During previous automated script rewrites, a bug caused the live site to load with only the `labubu` video card and no functional UI tabs, side navigation elements, or interactive options visible.
+* **The Rule**: Never commit changes that result in a blank slate, missing tabs, or a locked-down interface that only displays a single video container. 
+* **The Test**: 
+  1. Always compile and test the build locally first (`npm run build` followed by a local preview check).
+  2. Verify that all dashboard navigation tabs (`'audits'`, `'evaluation'`, `'research'`, `'resolution'`) are present, active, and fully clickable.
+  3. Verify that the video selection list contains all integrated video assets (`fuarukee`, `labubu`, `cows_demo`, `office_demo`, `svd_0001`, etc.) rather than defaulting to showing just one isolated video without selection controls.
+  4. Ensure that the mobile-responsive flex/grid rules adapt perfectly and do not clip these buttons out of reach on smaller viewports.
