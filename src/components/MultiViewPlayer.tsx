@@ -13,16 +13,43 @@ interface MvMeta {
   note?: string;
 }
 
-const META_URL = '/media/vid-labu1_mv/meta.json';
-const WIGGLE = '/media/vid-labu1_wiggle.mp4';
-const SBS = '/media/vid-labu1_sbs.mp4';
-const ANA = '/media/vid-labu1_anaglyph.mp4';
+interface DatasetItem {
+  id: string;
+  name: string;
+  metaUrl: string;
+  wiggle: string;
+  sbs: string;
+  anaglyph: string;
+  mvBaseDir: string;
+}
+
+const DATASETS: DatasetItem[] = [
+  {
+    id: 'labubu',
+    name: 'Labubu Toy Walk',
+    metaUrl: '/media/vid-labu1_mv/meta.json',
+    wiggle: '/media/vid-labu1_wiggle.mp4',
+    sbs: '/media/vid-labu1_sbs.mp4',
+    anaglyph: '/media/vid-labu1_anaglyph.mp4',
+    mvBaseDir: '/media/vid-labu1_mv',
+  },
+  {
+    id: 'svd_0001',
+    name: 'SVD Spatial Video (iPhone 16 Pro)',
+    metaUrl: '/media/svd_0001_mv/meta.json',
+    wiggle: '/media/svd_0001_wiggle.mp4',
+    sbs: '/media/svd_0001_sbs.mp4',
+    anaglyph: '/media/svd_0001_anaglyph.mp4',
+    mvBaseDir: '/media/svd_0001_mv',
+  }
+];
 
 type Tab = 'simple' | 'head';
 
 /** Fast path: prebaked videos. Optional: tiny head-tracked multiview. */
 export default function MultiViewPlayer() {
   const [tab, setTab] = useState<Tab>('simple');
+  const [selectedDataset, setSelectedDataset] = useState<DatasetItem>(DATASETS[0]);
   const [meta, setMeta] = useState<MvMeta | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [frameIdx, setFrameIdx] = useState(0);
@@ -31,14 +58,26 @@ export default function MultiViewPlayer() {
   const [playing, setPlaying] = useState(true);
   const [showSheet, setShowSheet] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [simpleSrc, setSimpleSrc] = useState(WIGGLE);
+  const [simpleSrc, setSimpleSrc] = useState(DATASETS[0].wiggle);
 
   useEffect(() => {
-    fetch(META_URL)
+    setMeta(null);
+    setErr(null);
+    setFrameIdx(0);
+    fetch(selectedDataset.metaUrl)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('no multiview meta'))))
       .then((m: MvMeta) => setMeta(m))
       .catch((e) => setErr(String(e.message || e)));
-  }, []);
+    
+    setSimpleSrc(selectedDataset.wiggle);
+  }, [selectedDataset]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.src = simpleSrc;
+      void videoRef.current.play().catch(() => {});
+    }
+  }, [simpleSrc]);
 
   useEffect(() => {
     if (!meta || !playing || tab !== 'head') return;
@@ -63,25 +102,55 @@ export default function MultiViewPlayer() {
   const frame = meta?.frames[frameIdx];
   const viewUrl = useMemo(() => {
     if (!meta || !frame) return null;
-    return `/media/vid-labu1_mv/${frame.dir}/v${vx}_${vy}.jpg`;
-  }, [meta, frame, vx, vy]);
+    return `${selectedDataset.mvBaseDir}/${frame.dir}/v${vx}_${vy}.jpg`;
+  }, [meta, frame, vx, vy, selectedDataset]);
 
   const sheetUrl = frame
-    ? `/media/vid-labu1_mv/${frame.dir}/sheet.jpg`
-    : '/media/vid-labu1_mv/preview_sheet.jpg';
+    ? `${selectedDataset.mvBaseDir}/${frame.dir}/sheet.jpg`
+    : `${selectedDataset.mvBaseDir}/preview_sheet.jpg`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#0a0e14', color: '#e8eef4' }}>
-      <div style={{ padding: '10px 14px', borderBottom: '1px solid #2a3848', fontSize: 13 }}>
-        <strong>Prebaked 3D video</strong> — depth was computed once; these files play like normal video.
-        <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-          <button type="button" style={tab === 'simple' ? tabOn : tabOff} onClick={() => setTab('simple')}>
-            Simple videos (fast)
-          </button>
-          <button type="button" style={tab === 'head' ? tabOn : tabOff} onClick={() => setTab('head')}>
-            Head-tracked views
-          </button>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid #2a3848', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>Prebaked 3D & Lightfield Video</div>
+          <div style={{ fontSize: 11, color: '#8fa3b8', marginTop: 2 }}>Depth-Image-Based Rendering (DIBR) novel viewpoint sweeps.</div>
         </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: 12, color: '#8fa3b8' }}>Dataset:</span>
+          <select
+            value={selectedDataset.id}
+            onChange={(e) => {
+              const ds = DATASETS.find((d) => d.id === e.target.value);
+              if (ds) setSelectedDataset(ds);
+            }}
+            style={{
+              background: '#1c2836',
+              color: '#fff',
+              border: '1px solid #2a3848',
+              borderRadius: 6,
+              padding: '4px 8px',
+              fontSize: 12,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            {DATASETS.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div style={{ padding: '10px 14px', borderBottom: '1px solid #2a3848', fontSize: 13, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <button type="button" style={tab === 'simple' ? tabOn : tabOff} onClick={() => setTab('simple')}>
+          Simple videos (fast)
+        </button>
+        <button type="button" style={tab === 'head' ? tabOn : tabOff} onClick={() => setTab('head')}>
+          Head-tracked views
+        </button>
       </div>
 
       {tab === 'simple' && (
@@ -89,21 +158,15 @@ export default function MultiViewPlayer() {
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {(
               [
-                [WIGGLE, 'Wiggle (no glasses)'],
-                [SBS, 'Side-by-side stereo'],
-                [ANA, 'Anaglyph (red-cyan)'],
+                [selectedDataset.wiggle, 'Wiggle (no glasses)'],
+                [selectedDataset.sbs, 'Side-by-side stereo'],
+                [selectedDataset.anaglyph, 'Anaglyph (red-cyan)'],
               ] as [string, string][]
             ).map(([src, label]) => (
               <button
                 key={src}
                 type="button"
-                onClick={() => {
-                  setSimpleSrc(src);
-                  if (videoRef.current) {
-                    videoRef.current.src = src;
-                    void videoRef.current.play();
-                  }
-                }}
+                onClick={() => setSimpleSrc(src)}
                 style={simpleSrc === src ? tabOn : tabOff}
               >
                 {label}
@@ -131,7 +194,7 @@ export default function MultiViewPlayer() {
             <strong style={{ color: '#ccc' }}>Wiggle</strong> = viewpoint rocks so depth reads without a headset.
             <strong style={{ color: '#ccc' }}> SBS</strong> = VR / cross-eye.
             <strong style={{ color: '#ccc' }}> Anaglyph</strong> = red-cyan glasses.
-            This is the practical “sneaker-like depth” path for a <em>video</em>. The real sneaker uses a 3D mesh, not pixels.
+            This is the practical “sneaker-like depth” path for a <em>video</em>.
           </p>
         </div>
       )}
