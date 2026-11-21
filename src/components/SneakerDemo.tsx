@@ -39,6 +39,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
   const [stats, setStats] = useState<DepthMeshStats | null>(null);
   const [relief, setRelief] = useState(0.14);
   const [alphaCut, setAlphaCut] = useState(0.35);
+  const [zoom, setZoom] = useState(1.0);
 
   // Panel visibility — collapsed by default on small screens
   const [showInspector, setShowInspector] = useState(false);
@@ -133,6 +134,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
       );
       sceneRef.current = scene;
       scene.setUseMatte(useMatte);
+      scene.setZoom(zoom);
       scene.start();
     })();
 
@@ -462,6 +464,21 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             onChange={(e) => {
               setAlphaCut(+e.target.value);
               sceneRef.current?.setAlphaCut(+e.target.value);
+            }}
+            style={{ width: '100%' }}
+          />
+        </label>
+        <label style={sliderLabel}>
+          Zoom/Fit {zoom.toFixed(2)}x
+          <input
+            type="range"
+            min={0.5}
+            max={2.5}
+            step={0.05}
+            value={zoom}
+            onChange={(e) => {
+              setZoom(+e.target.value);
+              sceneRef.current?.setZoom(+e.target.value);
             }}
             style={{ width: '100%' }}
           />

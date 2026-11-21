@@ -341,6 +341,11 @@ export class DepthMeshScene {
     this.fgMat.uniforms.useMatte.value = val ? 1.0 : 0.0;
   }
 
+  setZoom(z: number) {
+    this.fgMesh.scale.set(z, z, z);
+    this.bgMesh.scale.set(z, z, z);
+  }
+
   togglePlay() {
     this.playing = !this.playing;
     this.syncPlay();
