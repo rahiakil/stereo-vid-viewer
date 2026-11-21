@@ -69,46 +69,46 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
     let cancelled = false;
     let scene: DepthMeshScene | null = null;
 
-    let fg = FG_VIDEO;
-    let depth = DEPTH_VIDEO;
-    let matte = MATTE_VIDEO;
-    let bg_target = BG_VIDEO;
+    let fg = `${FG_VIDEO}?v=20261121`;
+    let depth = `${DEPTH_VIDEO}?v=20261121`;
+    let matte = `${MATTE_VIDEO}?v=20261121`;
+    let bg_target = `${BG_VIDEO}?v=20261121`;
 
     if (selectedVideo === 'custom') {
-      fg = `${BASE}media/custom_rgb.mp4`;
-      depth = `${BASE}media/custom_depth.mp4`;
-      matte = `${BASE}media/custom_matte.mp4`;
-      bg_target = `${BASE}media/custom_bg_clean.mp4`;
+      fg = `${BASE}media/custom_rgb.mp4?v=20261121`;
+      depth = `${BASE}media/custom_depth.mp4?v=20261121`;
+      matte = `${BASE}media/custom_matte.mp4?v=20261121`;
+      bg_target = `${BASE}media/custom_bg_clean.mp4?v=20261121`;
     } else if (selectedVideo === 'fuarukee') {
-      fg = `${BASE}media/fuarukee_rgb.mp4`;
-      depth = `${BASE}media/fuarukee_depth.mp4`;
-      matte = `${BASE}media/fuarukee_matte.mp4`;
-      bg_target = `${BASE}media/fuarukee_bg_clean.mp4`;
+      fg = `${BASE}media/fuarukee_rgb.mp4?v=20261121`;
+      depth = `${BASE}media/fuarukee_depth.mp4?v=20261121`;
+      matte = `${BASE}media/fuarukee_matte.mp4?v=20261121`;
+      bg_target = `${BASE}media/fuarukee_bg_clean.mp4?v=20261121`;
     } else if (selectedVideo === 'seal_demo') {
-      fg = `${BASE}media/seal_demo_rgb.mp4`;
-      depth = `${BASE}media/seal_demo_depth.mp4`;
-      matte = `${BASE}media/seal_demo_matte.mp4`;
-      bg_target = `${BASE}media/seal_demo_bg_clean.mp4`;
+      fg = `${BASE}media/seal_demo_rgb.mp4?v=20261121`;
+      depth = `${BASE}media/seal_demo_depth.mp4?v=20261121`;
+      matte = `${BASE}media/seal_demo_matte.mp4?v=20261121`;
+      bg_target = `${BASE}media/seal_demo_bg_clean.mp4?v=20261121`;
     } else if (selectedVideo === 'dancing_demo') {
-      fg = `${BASE}media/dancing_demo_rgb.mp4`;
-      depth = `${BASE}media/dancing_demo_depth.mp4`;
-      matte = `${BASE}media/dancing_demo_matte.mp4`;
-      bg_target = `${BASE}media/dancing_demo_bg_clean.mp4`;
+      fg = `${BASE}media/dancing_demo_rgb.mp4?v=20261121`;
+      depth = `${BASE}media/dancing_demo_depth.mp4?v=20261121`;
+      matte = `${BASE}media/dancing_demo_matte.mp4?v=20261121`;
+      bg_target = `${BASE}media/dancing_demo_bg_clean.mp4?v=20261121`;
     } else if (selectedVideo === 'cows_demo') {
-      fg = `${BASE}media/cows_demo_rgb.mp4`;
-      depth = `${BASE}media/cows_demo_depth.mp4`;
-      matte = `${BASE}media/cows_demo_matte.mp4`;
-      bg_target = `${BASE}media/cows_demo_bg_clean.mp4`;
+      fg = `${BASE}media/cows_demo_rgb.mp4?v=20261121`;
+      depth = `${BASE}media/cows_demo_depth.mp4?v=20261121`;
+      matte = `${BASE}media/cows_demo_matte.mp4?v=20261121`;
+      bg_target = `${BASE}media/cows_demo_bg_clean.mp4?v=20261121`;
     } else if (selectedVideo === 'svd_0001') {
-      fg = `${BASE}media/svd_0001_rgb.mp4`;
-      depth = `${BASE}media/svd_0001_depth.mp4`;
-      matte = `${BASE}media/svd_0001_matte.mp4`;
-      bg_target = `${BASE}media/svd_0001_bg_clean.mp4`;
+      fg = `${BASE}media/svd_0001_rgb.mp4?v=20261121`;
+      depth = `${BASE}media/svd_0001_depth.mp4?v=20261121`;
+      matte = `${BASE}media/svd_0001_matte.mp4?v=20261121`;
+      bg_target = `${BASE}media/svd_0001_bg_clean.mp4?v=20261121`;
     } else if (selectedVideo === 'office_demo') {
-      fg = `${BASE}media/office_demo_rgb.mp4`;
-      depth = `${BASE}media/office_demo_depth.mp4`;
-      matte = `${BASE}media/office_demo_matte.mp4`;
-      bg_target = `${BASE}media/office_demo_bg_clean.mp4`;
+      fg = `${BASE}media/office_demo_rgb.mp4?v=20261121`;
+      depth = `${BASE}media/office_demo_depth.mp4?v=20261121`;
+      matte = `${BASE}media/office_demo_matte.mp4?v=20261121`;
+      bg_target = `${BASE}media/office_demo_bg_clean.mp4?v=20261121`;
     }
     const bg_default = fg;
 

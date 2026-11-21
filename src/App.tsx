@@ -58,23 +58,23 @@ export default function App() {
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;
     
-    let videoUrl = DEFAULT_VIDEO;
-    let depthUrl = DEFAULT_DEPTH;
+    let videoUrl = `${DEFAULT_VIDEO}?v=20261121`;
+    let depthUrl = `${DEFAULT_DEPTH}?v=20261121`;
     if (portalVideo === 'custom') {
-      videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4`;
-      depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4`;
+      videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4?v=20261121`;
+      depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4?v=20261121`;
     } else if (portalVideo === 'fuarukee') {
-      videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4`;
-      depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4`;
+      videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4?v=20261121`;
+      depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4?v=20261121`;
     } else if (portalVideo === 'cows_demo') {
-      videoUrl = `${import.meta.env.BASE_URL}media/cows_demo_stereo.mp4`;
-      depthUrl = `${import.meta.env.BASE_URL}media/cows_demo_depth.mp4`;
+      videoUrl = `${import.meta.env.BASE_URL}media/cows_demo_stereo.mp4?v=20261121`;
+      depthUrl = `${import.meta.env.BASE_URL}media/cows_demo_depth.mp4?v=20261121`;
     } else if (portalVideo === 'svd_0001') {
-      videoUrl = `${import.meta.env.BASE_URL}media/svd_0001_stereo.mp4`;
-      depthUrl = `${import.meta.env.BASE_URL}media/svd_0001_depth.mp4`;
+      videoUrl = `${import.meta.env.BASE_URL}media/svd_0001_stereo.mp4?v=20261121`;
+      depthUrl = `${import.meta.env.BASE_URL}media/svd_0001_depth.mp4?v=20261121`;
     } else if (portalVideo === 'office_demo') {
-      videoUrl = `${import.meta.env.BASE_URL}media/office_demo_stereo.mp4`;
-      depthUrl = `${import.meta.env.BASE_URL}media/office_demo_depth.mp4`;
+      videoUrl = `${import.meta.env.BASE_URL}media/office_demo_stereo.mp4?v=20261121`;
+      depthUrl = `${import.meta.env.BASE_URL}media/office_demo_depth.mp4?v=20261121`;
     }
 
     const scene = new StereoVideoScene(mountRef.current, videoUrl, DEFAULT_CAL, null);
