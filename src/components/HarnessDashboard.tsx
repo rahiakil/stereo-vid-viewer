@@ -99,7 +99,36 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
   const [selectedHistory, setSelectedHistory] = useState<HistoryItem | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'audits' | 'resolution'>('audits');
+  const [activeTab, setActiveTab] = useState<'audits' | 'evaluation' | 'resolution'>('audits');
+
+  const [simulatedPoseX, setSimulatedPoseX] = useState<number>(0.5);
+  const [isSimulatingSweep, setIsSimulatingSweep] = useState<boolean>(false);
+  const isLocalHost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  useEffect(() => {
+    if (!isSimulatingSweep) return;
+    let frameId: number;
+    const startTime = Date.now();
+    const animate = () => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      const x = 0.5 + 0.35 * Math.sin(elapsed * Math.PI * 0.7);
+      setSimulatedPoseX(x);
+      if ((window as any).setPoseValue) {
+        (window as any).setPoseValue({ x, y: 0.5, z: 0.8 });
+      }
+      frameId = requestAnimationFrame(animate);
+    };
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [isSimulatingSweep]);
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setSimulatedPoseX(val);
+    if ((window as any).setPoseValue) {
+      (window as any).setPoseValue({ x: val, y: 0.5, z: 0.8 });
+    }
+  };
 
   const fetchStatus = async () => {
     try {
@@ -306,6 +335,26 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
           <Activity size={14} /> 3D Parallax Audits
         </button>
         <button
+          onClick={() => setActiveTab('evaluation')}
+          style={{
+            background: activeTab === 'evaluation' ? '#1e293b' : 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'evaluation' ? '2px solid #3ecf8e' : 'none',
+            padding: '8px 16px',
+            color: activeTab === 'evaluation' ? '#fff' : '#94a3b8',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontSize: 12,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            transition: 'all 0.2s',
+            borderRadius: '4px 4px 0 0'
+          }}
+        >
+          <Activity size={14} /> 🧠 Algorithmic Self-Evaluation
+        </button>
+        <button
           onClick={() => setActiveTab('resolution')}
           style={{
             background: activeTab === 'resolution' ? '#1e293b' : 'transparent',
@@ -371,6 +420,62 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Simulated Parallax Interactive Testing Panel (Remote Desktop Friendly) */}
+          {isLocalHost && (
+            <div style={{ ...cardStyle, background: 'rgba(56, 189, 248, 0.08)', border: '1px solid #38bdf8', padding: 14, marginBottom: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#38bdf8' }}>
+                  <Activity size={14} />
+                  <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase' }}>Remote Desktop Parallax Simulator</span>
+                </div>
+                <span style={{ fontSize: 9, background: '#38bdf8', color: '#0f172a', padding: '1px 5px', borderRadius: 3, fontWeight: 800 }}>
+                  Local Server Active
+                </span>
+              </div>
+              <p style={{ margin: '0 0 10px', fontSize: 10, color: '#b4fee7', lineHeight: 1.4 }}>
+                Webcam unavailable over remote desktop. Use this manual sweep console to command the active 3D portal's camera depth-perspective directly in real-time.
+              </p>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 10, color: '#94a3b8' }}>Left (0.15)</span>
+                  <input 
+                    type="range" 
+                    min="0.15" 
+                    max="0.85" 
+                    step="0.01" 
+                    value={simulatedPoseX} 
+                    onChange={handleSliderChange}
+                    disabled={isSimulatingSweep}
+                    style={{ flex: 1, accentColor: '#38bdf8', cursor: isSimulatingSweep ? 'not-allowed' : 'pointer' }}
+                  />
+                  <span style={{ fontSize: 10, color: '#94a3b8' }}>Right (0.85)</span>
+                </div>
+                <button
+                  onClick={() => setIsSimulatingSweep(!isSimulatingSweep)}
+                  style={{ 
+                    background: isSimulatingSweep ? '#ef4444' : '#38bdf8', 
+                    border: 'none', 
+                    borderRadius: 4, 
+                    padding: '4px 10px', 
+                    color: isSimulatingSweep ? '#fff' : '#0f172a', 
+                    fontSize: 10, 
+                    fontWeight: 'bold', 
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}
+                >
+                  <RefreshCw size={10} className={isSimulatingSweep ? 'animate-spin' : ''} />
+                  {isSimulatingSweep ? 'Stop Sweep' : 'Auto Sweep Loop'}
+                </button>
+              </div>
+              <div style={{ marginTop: 6, fontSize: 10, color: '#38bdf8', fontWeight: 800 }}>
+                Active Simulated Coordinate: x = {simulatedPoseX.toFixed(2)} (y: 0.50, z: 0.80)
+              </div>
+            </div>
+          )}
 
           {/* Main Grid: History Cards on left, Eye screenshots on right */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 20, marginBottom: 24, alignItems: 'start' }}>
@@ -537,7 +642,7 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
                     </div>
                     <div style={screenshotFrame}>
                       <img 
-                        src={`${BASE_URL}${selectedHistory.left_screenshot}`} 
+                        src={`${BASE_URL}${selectedHistory.left_screenshot}?v=${selectedHistory.parallax_variance}`} 
                         alt="Left eye simulated view" 
                         style={{ width: '100%', height: 'auto', display: 'block' }}
                         onError={(e) => {
@@ -554,7 +659,7 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
                     </div>
                     <div style={screenshotFrame}>
                       <img 
-                        src={`${BASE_URL}${selectedHistory.right_screenshot}`} 
+                        src={`${BASE_URL}${selectedHistory.right_screenshot}?v=${selectedHistory.parallax_variance}`} 
                         alt="Right eye simulated view" 
                         style={{ width: '100%', height: 'auto', display: 'block' }}
                         onError={(e) => {
@@ -586,6 +691,114 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
             )}
           </div>
         </div>
+        </div>
+      ) : activeTab === 'evaluation' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Dynamic Progress and Strategic Evaluation Dashboard */}
+          <div style={{ ...cardStyle, background: 'linear-gradient(to right, #0f172a, #1e1b4b)', border: '1px solid #c084fc', padding: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <span style={{ fontSize: 24 }}>🧠</span>
+              <div>
+                <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: '#fff', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                  Algorithmic Self-Evaluation & Progress Console
+                </h2>
+                <p style={{ margin: '4px 0 0', fontSize: 11, color: '#c084fc' }}>
+                  How the AI background harness systematically evaluates and self-reflects to make the 3D pipeline better
+                </p>
+              </div>
+            </div>
+
+            <p style={{ margin: '0 0 20px', fontSize: 12, color: '#cbd5e1', lineHeight: 1.6 }}>
+              Unlike simple flat video players, our Glasses-Free Autostereoscopic pipeline converts regular monocular 2D videos into real-time textured 3D meshes inside a virtual three-dimensional portal. This requires intense structural depth estimation (Depth-Anything-V2), silhouette segment matting, empty background boundary inpainting, and horizontal camera perspective displacement. We treat optimization as a continuous, self-evaluating closed-loop feedback mechanism.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+              
+              {/* Card 1: Our Evaluation Metric & OpenCV Math */}
+              <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: 10, padding: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, color: '#38bdf8' }}>
+                  <Activity size={16} />
+                  <h3 style={{ fontSize: 12, fontWeight: 800, margin: 0, textTransform: 'uppercase' }}>Disparity Variance Metric (3D Index)</h3>
+                </div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.5, marginBottom: 12 }}>
+                  How do we evaluate quality programmatically? We use a headless Chromium browser to simulate horizontal eye sweeps from Left (<code style={{ color: '#fff' }}>x = 0.15</code>) to Right (<code style={{ color: '#fff' }}>x = 0.85</code>). OpenCV then calculates the <strong>Mean Absolute Difference</strong> (disparity variance) of the canvas frames:
+                </p>
+                <div style={{ background: '#111827', padding: '12px 16px', borderRadius: 6, fontFamily: 'monospace', fontSize: 11, color: '#38bdf8', textAlign: 'center', border: '1px solid #1f2937', marginBottom: 12 }}>
+                  {"\\[ \\mathcal{V} = \\frac{1}{w \\cdot h} \\sum_{x=1}^{w} \\sum_{y=1}^{h} | I_{\\text{left}}(x,y) - I_{\\text{right}}(x,y) | \\]"}
+                </div>
+                <ul style={{ fontSize: 11, color: '#cbd5e1', paddingLeft: 16, margin: 0, lineHeight: 1.5 }}>
+                  <li style={{ marginBottom: 6 }}><strong style={{ color: '#f59e0b' }}>Index &gt;= 4.0 (Best):</strong> Stunning volume and foreground relief.</li>
+                  <li style={{ marginBottom: 6 }}><strong style={{ color: '#a8a29e' }}>Index 1.5 - 3.9 (Medium):</strong> Moderate 3D relief, with minor occlusion halos.</li>
+                  <li><strong style={{ color: '#ef4444' }}>Index &lt; 1.5 (Flat/Fallback):</strong> Flat projection with minimal pixel displacement.</li>
+                </ul>
+              </div>
+
+              {/* Card 2: Strategic Progress Milestones */}
+              <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: 10, padding: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, color: '#10b981' }}>
+                  <CheckCircle size={16} />
+                  <h3 style={{ fontSize: 12, fontWeight: 800, margin: 0, textTransform: 'uppercase' }}>Active Pipeline Milestones</h3>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+                      <span>1. Depth Map Estimation & Un-Squeezing</span>
+                      <span style={{ color: '#10b981' }}>100% COMPLETE</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 10, color: '#94a3b8', lineHeight: 1.4 }}>
+                      Reconstructs Left monocular feed into a 3D depth field via Depth-Anything-V2, scaling to 640x360 landscape layout.
+                    </p>
+                  </div>
+                  <div style={{ borderTop: '1px solid #1f2937', paddingTop: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+                      <span>2. Background Inpainting (LaMa Boundary Fill)</span>
+                      <span style={{ color: '#10b981' }}>100% COMPLETE</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 10, color: '#94a3b8', lineHeight: 1.4 }}>
+                      Uses u2net segment-matte to isolate subjects and inpaint empty background pixels, avoiding background "clipping" during camera shifts.
+                    </p>
+                  </div>
+                  <div style={{ borderTop: '1px solid #1f2937', paddingTop: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+                      <span>3. Closed-Loop Playwright Relief Optimization</span>
+                      <span style={{ color: '#10b981' }}>100% COMPLETE</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 10, color: '#94a3b8', lineHeight: 1.4 }}>
+                      Automated evolutionary testing swept from 0.08 to 0.26 relief to maximize 3D Index score below a maximum warping cap of 10.0.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Section: Recommended Upgrades for Perfecting 3D */}
+            <div style={{ marginTop: 24, background: 'rgba(192, 132, 252, 0.04)', border: '1px solid rgba(192, 132, 252, 0.15)', borderRadius: 10, padding: 16 }}>
+              <h3 style={{ fontSize: 12, fontWeight: 800, color: '#c084fc', margin: '0 0 10px', textTransform: 'uppercase' }}>
+                🚀 Future Evolutionary Steps (Iterating to be Better)
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+                <div>
+                  <h4 style={{ fontSize: 11, fontWeight: 800, color: '#fff', margin: '0 0 4px' }}>Optical Flow Temporal Smoothing</h4>
+                  <p style={{ margin: 0, fontSize: 10, color: '#cbd5e1', lineHeight: 1.4 }}>
+                    Integrating temporal Lucas-Kanade optical flow on the depth generator output. This will smooth out depth map estimations over consecutive frames, eliminating minor edge-flicker in high-speed motion.
+                  </p>
+                </div>
+                <div>
+                  <h4 style={{ fontSize: 11, fontWeight: 800, color: '#fff', margin: '0 0 4px' }}>Adaptive Mesh Tessellation</h4>
+                  <p style={{ margin: 0, fontSize: 10, color: '#cbd5e1', lineHeight: 1.4 }}>
+                    Subdividing the 3D WebGL mesh dynamically based on depth boundary gradients. Allocating more triangles to sharp foreground objects (like the Labubu toy or sneaker edge) while keeping background meshes low-poly.
+                  </p>
+                </div>
+                <div>
+                  <h4 style={{ fontSize: 11, fontWeight: 800, color: '#fff', margin: '0 0 4px' }}>Focus-Weighted Depth Inpainting</h4>
+                  <p style={{ margin: 0, fontSize: 10, color: '#cbd5e1', lineHeight: 1.4 }}>
+                    Applying focal-length lens scaling to the empty background inpaint plate. This preserves correct perspective lines when sweeping off-axis, making look-around feel highly physical and natural.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         /* Harness Resolution & Audit Log View */
