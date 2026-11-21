@@ -49,6 +49,12 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
   const [isSweeping, setIsSweeping] = useState(false);
 
   useEffect(() => {
+    if (defaultVideo) {
+      setSelectedVideo(defaultVideo);
+    }
+  }, [defaultVideo]);
+
+  useEffect(() => {
     setUseMatte(selectedVideo !== 'fuarukee');
   }, [selectedVideo]);
 

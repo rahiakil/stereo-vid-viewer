@@ -20,6 +20,16 @@ const DEFAULT_CAL = {
 
 type AppMode = 'sneaker' | 'explain' | 'multiview' | 'portal' | 'harness';
 
+const VIDEO_TITLES: Record<string, string> = {
+  'labubu': 'Labubu Toy Walk',
+  'custom': 'First Custom Video',
+  'fuarukee': 'Fuarukee POV',
+  'office_demo': 'Office Demo',
+  'cows_demo': 'Cows Demo',
+  'seal_demo': 'Seal Demo',
+  'dancing_demo': 'Dancing Demo',
+};
+
 export default function App() {
   const [appMode, setAppMode] = useState<AppMode>('sneaker');
   const mountRef = useRef<HTMLDivElement>(null);
@@ -38,6 +48,12 @@ export default function App() {
   const [portalVideo, setPortalVideo] = useState<'labubu' | 'custom' | 'fuarukee' | 'office_demo' | string>('fuarukee');
   const [currentVideoToPlay, setCurrentVideoToPlay] = useState<string>('fuarukee');
 
+  const getDisplayTitle = () => {
+    const id = appMode === 'portal' ? portalVideo : currentVideoToPlay;
+    if (VIDEO_TITLES[id]) return VIDEO_TITLES[id];
+    return id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  };
+
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;
     
@@ -46,7 +62,7 @@ export default function App() {
     if (portalVideo === 'custom') {
       videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4`;
-    } else if (portalVideo === 'cows_demo') {
+    } else if (portalVideo === 'fuarukee') {
       videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4`;
     } else if (portalVideo === 'cows_demo') {
@@ -159,7 +175,7 @@ export default function App() {
         }}
       >
         <div>
-          <div style={{ fontWeight: 650, fontSize: 16 }}>Labubu · Free viewpoint</div>
+          <div style={{ fontWeight: 650, fontSize: 16 }}>{getDisplayTitle()} · Free viewpoint</div>
           <div style={{ fontSize: 12, color: '#8fa3b8' }}>{videoLabel}</div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
