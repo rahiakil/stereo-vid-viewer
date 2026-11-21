@@ -28,6 +28,7 @@ const VIDEO_TITLES: Record<string, string> = {
   'cows_demo': 'Cows Demo',
   'seal_demo': 'Seal Demo',
   'dancing_demo': 'Dancing Demo',
+  'svd_0001': 'SVD Spatial Video (iPhone 16 Pro)',
 };
 
 export default function App() {
@@ -68,6 +69,9 @@ export default function App() {
     } else if (portalVideo === 'cows_demo') {
       videoUrl = `${import.meta.env.BASE_URL}media/cows_demo_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/cows_demo_depth.mp4`;
+    } else if (portalVideo === 'svd_0001') {
+      videoUrl = `${import.meta.env.BASE_URL}media/svd_0001_stereo.mp4`;
+      depthUrl = `${import.meta.env.BASE_URL}media/svd_0001_depth.mp4`;
     } else if (portalVideo === 'office_demo') {
       videoUrl = `${import.meta.env.BASE_URL}media/office_demo_stereo.mp4`;
       depthUrl = `${import.meta.env.BASE_URL}media/office_demo_depth.mp4`;

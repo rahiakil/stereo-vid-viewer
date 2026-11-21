@@ -1,12 +1,23 @@
 {
   "system": {
-    "cpu_usage_pct": 10.6,
-    "memory_usage_pct": 41.4,
+    "cpu_usage_pct": 10.4,
+    "memory_usage_pct": 44.6,
     "avg_processing_time_sec": 85.0,
-    "total_processed": 6
+    "total_processed": 7
   },
   "queue": [],
   "history": [
+    {
+      "id": "svd_0001",
+      "title": "SVD Spatial Video (iPhone 16 Pro)",
+      "duration_sec": 5.0,
+      "processing_time_sec": 18.6,
+      "parallax_variance": 5.25,
+      "status": "success",
+      "left_screenshot": "media/dashboard/fuarukee_left.png",
+      "right_screenshot": "media/dashboard/fuarukee_right.png",
+      "description": "True Apple iPhone 16 Pro Spatial Video (MV-HEVC) demuxed into Left and Right views and processed into depth-mesh. (Optimized Relief: 0.16)"
+    },
     {
       "id": "seal_demo",
       "title": "Seal Demo",

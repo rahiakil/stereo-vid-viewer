@@ -226,11 +226,11 @@ export class DepthMeshScene {
         void this.playAll();
       }
     };
-    this.fgVideo.addEventListener('canplaythrough', markReady, { once: true });
-    this.depthVideo.addEventListener('canplaythrough', markReady, { once: true });
-    this.matteVideo.addEventListener('canplaythrough', markReady, { once: true });
+    this.fgVideo.addEventListener('canplay', markReady, { once: true });
+    this.depthVideo.addEventListener('canplay', markReady, { once: true });
+    this.matteVideo.addEventListener('canplay', markReady, { once: true });
     if (this.bgVideo) {
-      this.bgVideo.addEventListener('canplaythrough', markReady, { once: true });
+      this.bgVideo.addEventListener('canplay', markReady, { once: true });
     } else {
       // No BG stream — still count it as "ready" (uses FG texture as fallback)
       this.streamsTotal = 3;

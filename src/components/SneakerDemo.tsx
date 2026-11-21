@@ -97,6 +97,11 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
       depth = `${BASE}media/cows_demo_depth.mp4`;
       matte = `${BASE}media/cows_demo_matte.mp4`;
       bg_target = `${BASE}media/cows_demo_bg_clean.mp4`;
+    } else if (selectedVideo === 'svd_0001') {
+      fg = `${BASE}media/svd_0001_rgb.mp4`;
+      depth = `${BASE}media/svd_0001_depth.mp4`;
+      matte = `${BASE}media/svd_0001_matte.mp4`;
+      bg_target = `${BASE}media/svd_0001_bg_clean.mp4`;
     } else if (selectedVideo === 'office_demo') {
       fg = `${BASE}media/office_demo_rgb.mp4`;
       depth = `${BASE}media/office_demo_depth.mp4`;
