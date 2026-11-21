@@ -45,7 +45,10 @@ const BG_FRAG = /* glsl */ `
   void main() {
     vec2 uv = vUv;
     if (isStereoSBS > 0.5) {
-      uv.x = uv.x * 0.5 + (eye * 0.5);
+      // Clamp to prevent sub-pixel bleeding at the horizontal boundaries between eyes
+      float minX = eye * 0.5 + 0.001;
+      float maxX = eye * 0.5 + 0.5 - 0.001;
+      uv.x = clamp(uv.x * 0.5 + (eye * 0.5), minX, maxX);
     }
     vec4 color = texture2D(map, uv);
     // Optional: slightly dim regions that are covered by FG (near)
@@ -86,7 +89,10 @@ const FG_FRAG = /* glsl */ `
     if (vMask < 0.02) discard;
     vec2 uv = vUv;
     if (isStereoSBS > 0.5) {
-      uv.x = uv.x * 0.5 + (eye * 0.5);
+      // Clamp to prevent sub-pixel bleeding at the horizontal boundaries between eyes
+      float minX = eye * 0.5 + 0.001;
+      float maxX = eye * 0.5 + 0.5 - 0.001;
+      uv.x = clamp(uv.x * 0.5 + (eye * 0.5), minX, maxX);
     }
     vec4 color = texture2D(map, uv);
     color.a *= vMask;
@@ -467,7 +473,10 @@ export class StereoVideoScene {
     this.renderer.clear();
 
     if (this.mode === 'window') {
-      const eyeVal = this.isStereoSBS > 0.5 ? Math.max(0.0, Math.min(1.0, 1.0 - this.pose.x)) : 0.0;
+      // Use a clean, fixed Left eye (0.0) for the monocular window view.
+      // This prevents split-screen SBS sliding/bleeding, while the 3D depth-mesh and off-axis camera
+      // handle the continuous look-around perspective perfectly and continuously.
+      const eyeVal = 0.0;
       this.bgMat.uniforms.eye.value = eyeVal;
       this.fgMat.uniforms.eye.value = eyeVal;
       this.offAxis.applyToCamera(this.cameraL, eyeC);

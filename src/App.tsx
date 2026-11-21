@@ -339,22 +339,29 @@ export default function App() {
               <span>Source:</span>
               <button
                 type="button"
-                onClick={() => { setPortalVideo('office_demo'); setIsStereoSBS(true); }}
-                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'office_demo' ? '#e0c068' : '#1c2836', color: portalVideo === 'office_demo' ? '#000' : '#fff' }}
+                onClick={() => { setPortalVideo('fuarukee'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'fuarukee' ? '#e0c068' : '#1c2836', color: portalVideo === 'fuarukee' ? '#000' : '#fff' }}
               >
                 Fuarukee
               </button>
               <button
                 type="button"
+                onClick={() => { setPortalVideo('office_demo'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'office_demo' ? '#a78bfa' : '#1c2836', color: portalVideo === 'office_demo' ? '#000' : '#fff' }}
+              >
+                Office
+              </button>
+              <button
+                type="button"
                 onClick={() => { setPortalVideo('custom'); setIsStereoSBS(true); }}
-                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'custom' ? '#5b9fd4' : '#1c2836' }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'custom' ? '#5b9fd4' : '#1c2836', color: portalVideo === 'custom' ? '#fff' : '#fff' }}
               >
                 My SBS
               </button>
               <button
                 type="button"
                 onClick={() => { setPortalVideo('labubu'); setIsStereoSBS(false); }}
-                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'labubu' ? '#3ecf8e' : '#1c2836' }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'labubu' ? '#3ecf8e' : '#1c2836', color: portalVideo === 'labubu' ? '#fff' : '#fff' }}
               >
                 Labubu
               </button>
