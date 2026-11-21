@@ -1,7 +1,7 @@
 {
   "system": {
-    "cpu_usage_pct": 83.7,
-    "memory_usage_pct": 41.2,
+    "cpu_usage_pct": 10.8,
+    "memory_usage_pct": 42.5,
     "avg_processing_time_sec": 85.0,
     "total_processed": 6
   },
