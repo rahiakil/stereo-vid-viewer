@@ -99,7 +99,7 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
   const [selectedHistory, setSelectedHistory] = useState<HistoryItem | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'audits' | 'evaluation' | 'resolution'>('audits');
+  const [activeTab, setActiveTab] = useState<'audits' | 'evaluation' | 'resolution' | 'research'>('audits');
 
   const [simulatedPoseX, setSimulatedPoseX] = useState<number>(0.5);
   const [isSimulatingSweep, setIsSimulatingSweep] = useState<boolean>(false);
@@ -373,6 +373,26 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
           }}
         >
           <AlertCircle size={14} /> Harness Resolution & Audit Log
+        </button>
+        <button
+          onClick={() => setActiveTab('research')}
+          style={{
+            background: activeTab === 'research' ? '#1e293b' : 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'research' ? '2px solid #3ecf8e' : 'none',
+            padding: '8px 16px',
+            color: activeTab === 'research' ? '#fff' : '#94a3b8',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontSize: 12,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            transition: 'all 0.2s',
+            borderRadius: '4px 4px 0 0'
+          }}
+        >
+          <Film size={14} /> 📚 Research Datasets Library
         </button>
       </div>
 
@@ -799,6 +819,283 @@ export default function HarnessDashboard({ onPlayVideo }: Props) {
               </div>
             </div>
           </div>
+        </div>
+      ) : activeTab === 'research' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Main Academic Campaign Banner */}
+          <div style={{ ...cardStyle, background: 'linear-gradient(to right, #0f172a, #042f2e)', border: '1px solid #14b8a6', padding: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span style={{ fontSize: 24 }}>📚</span>
+              <div>
+                <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: '#fff', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                  Stereoscopic & Light-Field Research Datasets
+                </h2>
+                <p style={{ margin: '4px 0 0', fontSize: 11, color: '#14b8a6' }}>
+                  A curated index of elite university and open-source spatial datasets under evaluation for Glasses-Free 3D Portal View
+                </p>
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: 12, color: '#cbd5e1', lineHeight: 1.6 }}>
+              To construct a flawless glasses-free holographic experience, we evaluate open-source spatial, stereoscopic (left-right), and multi-camera light-field video resources. Standard stereoscopic files give us direct horizontal disparity for depth extraction, while multi-view and light-field captures allow us to synthesize new viewpoints dynamically using Depth-Image-Based Rendering (DIBR) instead of stretching single video pairs.
+            </p>
+          </div>
+
+          {/* Folder Category 1: Spatial Ingestions & Open Movies */}
+          <div>
+            <h3 style={{ fontSize: 13, fontWeight: 800, color: '#2dd4bf', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>📁</span> iPhone Spatial Captures & Cinematic Films
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 16 }}>
+              
+              <div style={{ ...cardStyle, border: '1px solid #10b981', background: 'rgba(16, 185, 129, 0.03)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>SVD Spatial Video</h4>
+                  <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4, background: '#10b981', color: '#000' }}>ACTIVE / PROCESSED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>Univ. of Klagenfurt (ATHENA Lab)</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  310 real Apple Vision Pro and iPhone 16 Pro spatial videos in MV-HEVC format. Indoor/outdoor natural scenes.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#38bdf8' }}>3D Marker: 🌟 Outstanding (5.25 Score)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Pristine textures, comfortable focal scaling, and direct HEVC view-layer mapping. Perfect for mobile glasses-free look-around.
+                  </div>
+                </div>
+                <a href="https://ftp.itec.aau.at/datasets/SVD/" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Download Dataset FTP Directory</a>
+              </div>
+
+              <div style={{ ...cardStyle, border: '1px solid #10b981', background: 'rgba(16, 185, 129, 0.03)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>Big Buck Bunny 3D</h4>
+                  <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4, background: '#10b981', color: '#000' }}>ACTIVE / BAKED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>Blender Foundation</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  Full stereoscopic open movie, packed in Above-Below (ABL) 3D layout. Direct zip downloads, no login.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#38bdf8' }}>3D Marker: 🌟 Outstanding (4.80 Score)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Ideal cinematic 3D layout. Prebaked wiggle and anaglyph formats load beautifully on mobile screens.
+                  </div>
+                </div>
+                <a href="https://download.blender.org/demo/movies/BBB/" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Download Blender BBB Directory</a>
+              </div>
+
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>NAMA3DS1-COSPAD1</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>University of Nantes</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  10 dynamic Full HD stereoscopic source scenes captured on a twin-lens professional 3D camera.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#a855f7' }}>3D Marker: 📂 Standard 3D (4.15 Potential)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Excellent metric baseline; high-contrast borders and sharp scenery outlines prevent edge haloing.
+                  </div>
+                </div>
+                <a href="https://zenodo.org/records/14916311" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Open Nantes Zenodo Deposit</a>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Folder Category 2: High-Fidelity Synthetic Stereos */}
+          <div>
+            <h3 style={{ fontSize: 13, fontWeight: 800, color: '#2dd4bf', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>📁</span> High-Fidelity Synthetic Stereos
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 16 }}>
+              
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>Spring Benchmark</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>University of Stuttgart</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  47 synthetic photoreal stereo sequences with dense pixel-level ground-truth disparity, optical flow, and scene flow.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#38bdf8' }}>3D Marker: 🌟 Outstanding (Perfect Depth)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Provides perfect, noise-free displacement limits. Highly useful to test custom WebGL mesh deformation without matting noise.
+                  </div>
+                </div>
+                <a href="https://spring-benchmark.org/download" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Visit Stuttgart Spring Benchmark</a>
+              </div>
+
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>SceneFlow</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>University of Freiburg</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  Massive synthetic stereo collection (Monkaa, FlyingThings3D, Driving) with perfect depth and camera metadata.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#a855f7' }}>3D Marker: 📂 Standard 3D (Perfect maps)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Ideal geometric test frames. However, objects fly across screen rapidly, requiring optical-flow temporal smoothing.
+                  </div>
+                </div>
+                <a href="https://lmb.informatik.uni-freiburg.de/resources/datasets/SceneFlowDatasets.en.html" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Download Freiburg SceneFlow</a>
+              </div>
+
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>Dynamic Replica</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>Meta AI & University of Oxford</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  524 synthetic dynamic stereo videos of scanned animals and people in dense photorealistic indoor rooms.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#38bdf8' }}>3D Marker: 🌟 Outstanding (Pristine Maps)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Incredibly dense depth maps and segmented character masks. Renders beautiful 3D mesh borders without u2net noise.
+                  </div>
+                </div>
+                <a href="https://dynamic-stereo.github.io/" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Dynamic Stereo Portal</a>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Folder Category 3: Immersive Multi-View & Light Fields */}
+          <div>
+            <h3 style={{ fontSize: 13, fontWeight: 800, color: '#2dd4bf', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>📁</span> Immersive Multi-View & Light-Field Captures
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 16 }}>
+              
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>Google DeepView</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>Google (SIGGRAPH 2020)</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  15 raw 46-camera hemispherical lightfield video scenes. Features 46 synchronized fisheye feeds + structure calibration data.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#38bdf8' }}>3D Marker: 🌟 Outstanding (The Gold Standard)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Exceptional lightfield baseline for viewpoint sweeps. However, loading 46 HD videos causes instant browser GPU crashes on mobile.
+                  </div>
+                </div>
+                <a href="https://github.com/augmentedperception/deepview_video_dataset" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>DeepView Dataset GitHub</a>
+              </div>
+
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>Neural 3D Video</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>Meta Reality Labs & USC</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  6 real dynamic indoor scenes, captured on 21 synchronized high-speed cameras with calibrated poses.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#38bdf8' }}>3D Marker: 🌟 Outstanding (Highly Dynamic)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Ideal for dynamic actor meshes. Requires custom multi-camera viewpoint blending inside the WebGL pipeline.
+                  </div>
+                </div>
+                <a href="https://neural-3d-video.github.io/" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Neural 3D Video Portal</a>
+              </div>
+
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>InterDigital Light-Field</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>InterDigital (Technicolor)</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  Synchronized 4x4 dynamic light-field video at 2048x1088 resolution, with active calibration files.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#a855f7' }}>3D Marker: 📂 Standard (Rectified PNGs)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Very clean dynamic structures. However, files are stored as heavy, uncompressed PNG sequences, causing slow mobile loads.
+                  </div>
+                </div>
+                <a href="https://www.interdigital.com/data_sets/light-field-dataset" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>InterDigital Dataset Request</a>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Folder Category 4: Real-World Driving & Scraped datasets */}
+          <div>
+            <h3 style={{ fontSize: 13, fontWeight: 800, color: '#2dd4bf', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>📁</span> LiDAR Driving & Large-Scale VR180 Web Scrapes
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 16, marginBottom: 24 }}>
+              
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>Stereo4D</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>Google DeepMind & NYU</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  Over 100,000 real-world 4D clips scraped from YouTube VR180 stereoscopic videos.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#ef4444' }}>3D Marker: ⚠️ Experimental (Highly Complex)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Huge dataset size (~3.6 TB). Real-world clips have highly variable baseline constraints, requiring manual calibration adjustments.
+                  </div>
+                </div>
+                <a href="https://stereo4d.github.io/" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Visit DeepMind Stereo4D</a>
+              </div>
+
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>DrivingStereo</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>SenseTime & Academic Authors</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  182,000 real-world driving stereo frames with highly accurate LiDAR-derived depth maps.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#a855f7' }}>3D Marker: 📂 Standard 3D (LiDAR Maps)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Pristine depth maps. However, driving perspectives are highly horizontal and lack moving foreground targets to segment.
+                  </div>
+                </div>
+                <a href="https://drivingstereo-dataset.github.io/" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Visit DrivingStereo Page</a>
+              </div>
+
+              <div style={{ ...cardStyle }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, margin: 0, color: '#fff' }}>WSVD (Web Stereo Dataset)</h4>
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#3b82f6', color: '#fff' }}>SUPPORTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#14b8a6', fontWeight: 600, marginBottom: 8 }}>Carnegie Mellon Univ. & Adobe</div>
+                <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  553 real stereoscopic videos scraped from YouTube, categorized with active clip index lists.
+                </p>
+                <div style={{ background: '#020617', padding: 8, borderRadius: 6, fontSize: 10, border: '1px solid #1e293b', marginBottom: 10 }}>
+                  <strong style={{ color: '#ef4444' }}>3D Marker: ⚠️ Experimental (Dead links)</strong>
+                  <div style={{ color: '#cbd5e1', marginTop: 4 }}>
+                    Many source video links have been removed or copyright-claimed by YouTube, requiring constant script maintenance.
+                  </div>
+                </div>
+                <a href="https://sites.google.com/view/wsvd/home" target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#38bdf8', textDecoration: 'underline', fontWeight: 600 }}>Open CMU WSVD Portal</a>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       ) : (
         /* Harness Resolution & Audit Log View */
