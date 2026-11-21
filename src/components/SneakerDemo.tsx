@@ -326,6 +326,13 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
           {[
             {
+              id: 'svd_0001',
+              title: 'SVD Spatial Video',
+              desc: 'Premium iPhone 16 Pro spatial video (MV-HEVC) demuxed and processed into beautiful depth-mesh Look-around.',
+              badge: 'iPhone 16 Pro',
+              badgeColor: '#ec4899',
+            },
+            {
               id: 'cows_demo',
               title: 'Cows Demo',
               desc: 'Scrape benchmark showing grazing cows. Reconstructed into 3D mesh sequence with matte-bypass continuous relief.',
