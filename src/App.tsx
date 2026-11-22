@@ -335,8 +335,8 @@ export default function App() {
               <span>Source:</span>
               <button
                 type="button"
-                onClick={() => { setPortalVideo('fuarukee'); setIsStereoSBS(true); }}
-                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'fuarukee' ? '#e0c068' : '#1c2836', color: portalVideo === 'fuarukee' ? '#000' : '#fff' }}
+                onClick={() => { setPortalVideo('nama_boxer'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'nama_boxer' ? '#e0c068' : '#1c2836', color: portalVideo === 'nama_boxer' ? '#000' : '#fff' }}
               >
                 Fuarukee
               </button>

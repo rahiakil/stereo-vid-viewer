@@ -1,0 +1,9 @@
+{
+  "status": "failed",
+  "errors": [
+    "Not supported",
+    "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"text=Nama Boxer\")\n"
+  ],
+  "parallax_variance": 0.0,
+  "best_relief": 0.16
+}

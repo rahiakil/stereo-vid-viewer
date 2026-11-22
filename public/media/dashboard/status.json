@@ -1,12 +1,29 @@
 {
   "system": {
-    "cpu_usage_pct": 13.4,
-    "memory_usage_pct": 45.9,
-    "avg_processing_time_sec": 86.3,
-    "total_processed": 8
+    "cpu_usage_pct": 56.4,
+    "memory_usage_pct": 43.7,
+    "avg_processing_time_sec": 88.2,
+    "total_processed": 9
   },
-  "queue": [],
+  "queue": [
+    {
+      "name": "nama_boxer.mp4",
+      "status": "pending",
+      "progress": 0
+    }
+  ],
   "history": [
+    {
+      "id": "nama_boxer",
+      "title": "Nama Boxer",
+      "duration_sec": 10.0,
+      "processing_time_sec": 103.4,
+      "parallax_variance": 0.0,
+      "status": "failed",
+      "left_screenshot": "media/dashboard/nama_boxer_left.png",
+      "right_screenshot": "media/dashboard/nama_boxer_right.png",
+      "description": "Processed stereoscopic SBS video 'nama_boxer'. Left eye view reconstructed into 3D mesh with empty in-painted background. (Optimized Relief: 0.16)"
+    },
     {
       "id": "bbb_sunflower",
       "title": "Bunny Sunflower (2D)",
