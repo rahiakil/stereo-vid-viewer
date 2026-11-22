@@ -1,17 +1,11 @@
 {
   "system": {
-    "cpu_usage_pct": 52.1,
-    "memory_usage_pct": 42.3,
+    "cpu_usage_pct": 10.4,
+    "memory_usage_pct": 44.3,
     "avg_processing_time_sec": 86.3,
     "total_processed": 8
   },
-  "queue": [
-    {
-      "name": "bbb_sunflower.mp4",
-      "status": "pending",
-      "progress": 0
-    }
-  ],
+  "queue": [],
   "history": [
     {
       "id": "bbb_sunflower",

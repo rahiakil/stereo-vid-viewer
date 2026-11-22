@@ -57,7 +57,8 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
   }, [defaultVideo]);
 
   useEffect(() => {
-    setUseMatte(selectedVideo !== 'fuarukee');
+    const matteBypassVideos = ['fuarukee', 'seal_demo', 'cows_demo'];
+    setUseMatte(!matteBypassVideos.includes(selectedVideo));
   }, [selectedVideo]);
 
   useEffect(() => {
@@ -69,46 +70,16 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
     let cancelled = false;
     let scene: DepthMeshScene | null = null;
 
-    let fg = `${FG_VIDEO}?v=20261121`;
-    let depth = `${DEPTH_VIDEO}?v=20261121`;
-    let matte = `${MATTE_VIDEO}?v=20261121`;
-    let bg_target = `${BG_VIDEO}?v=20261121`;
+    let fg = `${BASE}media/${selectedVideo}_rgb.mp4?v=20261121`;
+    let depth = `${BASE}media/${selectedVideo}_depth.mp4?v=20261121`;
+    let matte = `${BASE}media/${selectedVideo}_matte.mp4?v=20261121`;
+    let bg_target = `${BASE}media/${selectedVideo}_bg_clean.mp4?v=20261121`;
 
-    if (selectedVideo === 'custom') {
-      fg = `${BASE}media/custom_rgb.mp4?v=20261121`;
-      depth = `${BASE}media/custom_depth.mp4?v=20261121`;
-      matte = `${BASE}media/custom_matte.mp4?v=20261121`;
-      bg_target = `${BASE}media/custom_bg_clean.mp4?v=20261121`;
-    } else if (selectedVideo === 'fuarukee') {
-      fg = `${BASE}media/fuarukee_rgb.mp4?v=20261121`;
-      depth = `${BASE}media/fuarukee_depth.mp4?v=20261121`;
-      matte = `${BASE}media/fuarukee_matte.mp4?v=20261121`;
-      bg_target = `${BASE}media/fuarukee_bg_clean.mp4?v=20261121`;
-    } else if (selectedVideo === 'seal_demo') {
-      fg = `${BASE}media/seal_demo_rgb.mp4?v=20261121`;
-      depth = `${BASE}media/seal_demo_depth.mp4?v=20261121`;
-      matte = `${BASE}media/seal_demo_matte.mp4?v=20261121`;
-      bg_target = `${BASE}media/seal_demo_bg_clean.mp4?v=20261121`;
-    } else if (selectedVideo === 'dancing_demo') {
-      fg = `${BASE}media/dancing_demo_rgb.mp4?v=20261121`;
-      depth = `${BASE}media/dancing_demo_depth.mp4?v=20261121`;
-      matte = `${BASE}media/dancing_demo_matte.mp4?v=20261121`;
-      bg_target = `${BASE}media/dancing_demo_bg_clean.mp4?v=20261121`;
-    } else if (selectedVideo === 'cows_demo') {
-      fg = `${BASE}media/cows_demo_rgb.mp4?v=20261121`;
-      depth = `${BASE}media/cows_demo_depth.mp4?v=20261121`;
-      matte = `${BASE}media/cows_demo_matte.mp4?v=20261121`;
-      bg_target = `${BASE}media/cows_demo_bg_clean.mp4?v=20261121`;
-    } else if (selectedVideo === 'svd_0001') {
-      fg = `${BASE}media/svd_0001_rgb.mp4?v=20261121`;
-      depth = `${BASE}media/svd_0001_depth.mp4?v=20261121`;
-      matte = `${BASE}media/svd_0001_matte.mp4?v=20261121`;
-      bg_target = `${BASE}media/svd_0001_bg_clean.mp4?v=20261121`;
-    } else if (selectedVideo === 'office_demo') {
-      fg = `${BASE}media/office_demo_rgb.mp4?v=20261121`;
-      depth = `${BASE}media/office_demo_depth.mp4?v=20261121`;
-      matte = `${BASE}media/office_demo_matte.mp4?v=20261121`;
-      bg_target = `${BASE}media/office_demo_bg_clean.mp4?v=20261121`;
+    if (selectedVideo === 'labubu') {
+      fg = `${BASE}media/vid-labu1.mp4?v=20261121`;
+      depth = `${BASE}media/vid-labu1_depth.mp4?v=20261121`;
+      matte = `${BASE}media/vid-labu1_matte.mp4?v=20261121`;
+      bg_target = `${BASE}media/vid-labu1_bg_clean.mp4?v=20261121`;
     }
     const bg_default = fg;
 
@@ -421,6 +392,14 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
               badgeColor: '#3b82f6',
             },
             {
+              id: 'bbb_sunflower',
+              title: 'Bunny Sunflower (2D)',
+              class: 'Class B',
+              desc: 'Processed 2D monocular video. Depth estimated and reconstructed into 3D look-around mesh with empty in-painted background.',
+              badge: 'Monocular 2D',
+              badgeColor: '#ec4899',
+            },
+            {
               id: 'office_demo',
               title: 'Office Demo',
               class: 'Class B',
@@ -450,7 +429,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
             return (
               <div
                 key={item.id}
-                onClick={() => setSelectedVideo(item.id as 'labubu' | 'custom' | 'fuarukee' | 'office_demo' | 'cows_demo')}
+                onClick={() => setSelectedVideo(item.id)}
                 style={{
                   padding: '10px 12px',
                   borderRadius: 8,

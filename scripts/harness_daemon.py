@@ -224,8 +224,57 @@ def ensure_h264_compatibility(file_path: Path):
         log(f"Warning: Failed to transcode {file_path.name} to H264.")
 
 
+def check_is_sbs(path: Path) -> bool:
+    """Detects if video is Side-by-Side (SBS) by checking visual correlation between left and right halves."""
+    import tempfile
+    try:
+        from PIL import Image
+        import numpy as np
+    except ImportError:
+        # Fallback to name checking if dependencies are missing
+        name_lower = path.name.lower()
+        return "sbs" in name_lower or "stereo" in name_lower
+
+    temp_img = Path(tempfile.gettempdir()) / f"temp_{path.stem}_frame.png"
+    # Extract frame at 2 seconds
+    cmd = [
+        "ffmpeg", "-y", "-ss", "00:00:02", "-i", str(path),
+        "-vframes", "1", str(temp_img)
+    ]
+    try:
+        res = subprocess.run(cmd, capture_output=True, check=True)
+        if temp_img.exists():
+            img = Image.open(temp_img).convert('L')
+            arr = np.array(img)
+            h, w = arr.shape
+            left = arr[:, :w//2]
+            right = arr[:, w//2:]
+            
+            # Subsample to make computation fast
+            left_sub = left[::4, ::4]
+            right_sub = right[::4, ::4]
+            
+            mean_diff = np.mean(np.abs(left_sub.astype(float) - right_sub.astype(float)))
+            log(f"Check SBS: mean absolute difference between halves is {mean_diff:.2f}")
+            temp_img.unlink()
+            return mean_diff < 16.0
+    except Exception as e:
+        log(f"Check SBS detection failed: {e}")
+        if temp_img.exists():
+            try:
+                temp_img.unlink()
+            except Exception:
+                pass
+    
+    # Default fallback based on filename keywords
+    name_lower = path.name.lower()
+    if "sbs" in name_lower or "stereo" in name_lower:
+        return True
+    return False
+
+
 def process_video(path: Path) -> dict | None:
-    """Run full AI extraction pipeline on SBS video."""
+    """Run full AI extraction pipeline on SBS or 2D video."""
     name = path.stem.lower().replace(" ", "_").replace("-", "_")
     log(f"Starting processing for: {path.name} (name: {name})")
     start_time = time.time()
@@ -248,21 +297,44 @@ def process_video(path: Path) -> dict | None:
             }
         )
 
-    # Step 1: Slice first 10 seconds of SBS stereo
-    report_progress("Slicing 10s SBS video clip", 10)
-    s1 = run_cmd([
-        "ffmpeg", "-y", "-ss", "00:00:00", "-t", "10", "-i", str(path),
-        "-c:v", "libx264", "-crf", "18", "-preset", "fast", str(stereo)
-    ])
+    # Automatically detect if source is SBS or monocular (2D)
+    is_sbs = check_is_sbs(path)
+    if is_sbs:
+        log(f"Input {path.name} detected as Side-by-Side (SBS) stereoscopic video.")
+    else:
+        log(f"Input {path.name} detected as standard 2D (monocular) video.")
+
+    # Step 1: Slice first 10 seconds of SBS stereo (or create synthetic SBS if 2D input)
+    report_progress("Slicing 10s video clip", 10)
+    if is_sbs:
+        s1 = run_cmd([
+            "ffmpeg", "-y", "-ss", "00:00:00", "-t", "10", "-i", str(path),
+            "-c:v", "libx264", "-crf", "18", "-preset", "fast", str(stereo)
+        ])
+    else:
+        # Create synthetic SBS by scaling the monocular video and stacking it side-by-side
+        s1 = run_cmd([
+            "ffmpeg", "-y", "-ss", "00:00:00", "-t", "10", "-i", str(path),
+            "-vf", "scale=320:360,setsar=1,split[left][right];[left][right]hstack",
+            "-c:v", "libx264", "-crf", "18", "-preset", "fast", str(stereo)
+        ])
     if not s1: return None
 
-    # Step 2: Crop left-eye and unsqueeze to 640x360 landscape (16:9)
-    report_progress("Cropping & unsqueezing left-eye monocular clip", 25)
-    s2 = run_cmd([
-        "ffmpeg", "-y", "-ss", "00:00:00", "-t", "10", "-i", str(path),
-        "-vf", "crop=320:360:0:0,scale=640:360,setsar=1",
-        "-c:v", "libx264", "-crf", "18", "-preset", "fast", str(rgb)
-    ])
+    # Step 2: Crop left-eye and unsqueeze to 640x360 landscape (if SBS) or scale to 640x360 (if 2D)
+    if is_sbs:
+        report_progress("Cropping & unsqueezing left-eye monocular clip", 25)
+        s2 = run_cmd([
+            "ffmpeg", "-y", "-ss", "00:00:00", "-t", "10", "-i", str(path),
+            "-vf", "crop=320:360:0:0,scale=640:360,setsar=1",
+            "-c:v", "libx264", "-crf", "18", "-preset", "fast", str(rgb)
+        ])
+    else:
+        report_progress("Scaling monocular clip to 640x360", 25)
+        s2 = run_cmd([
+            "ffmpeg", "-y", "-ss", "00:00:00", "-t", "10", "-i", str(path),
+            "-vf", "scale=640:360,setsar=1",
+            "-c:v", "libx264", "-crf", "18", "-preset", "fast", str(rgb)
+        ])
     if not s2: return None
 
     # Step 3: Run Depth Anything V2
@@ -299,7 +371,10 @@ def process_video(path: Path) -> dict | None:
     # Determine default badge details from known lists if matches
     badge = "Auto Processed"
     badge_color = "#a78bfa"
-    desc = f"Processed stereoscopic video '{name}'. Left eye view reconstructed into 3D mesh with empty in-painted background."
+    if is_sbs:
+        desc = f"Processed stereoscopic SBS video '{name}'. Left eye view reconstructed into 3D mesh with empty in-painted background."
+    else:
+        desc = f"Processed 2D monocular video '{name}'. Depth estimated and reconstructed into 3D look-around mesh with empty in-painted background."
     for asset in AUTO_ASSETS:
         if asset["id"] == name:
             badge = asset["badge"]
@@ -363,6 +438,7 @@ def update_react_code(meta: dict):
     card_search = """            {
               id: 'office_demo',
               title: 'Office Demo',
+              class: 'Class B',
               desc: 'Processed stereoscopic video "office_demo". Left eye view reconstructed into 3D mesh with empty in-painted background.',
               badge: 'Auto Processed',
               badgeColor: '#a78bfa',
@@ -374,6 +450,7 @@ def update_react_code(meta: dict):
     card_replace = f"""            {{
               id: '{meta['id']}',
               title: '{meta['title']}',
+              class: 'Class B',
               desc: '{meta['desc']}',
               badge: '{meta['badge']}',
               badgeColor: '{meta['badgeColor']}',
@@ -381,6 +458,7 @@ def update_react_code(meta: dict):
             {{
               id: 'office_demo',
               title: 'Office Demo',
+              class: 'Class B',
               desc: 'Processed stereoscopic video "office_demo". Left eye view reconstructed into 3D mesh with empty in-painted background.',
               badge: 'Auto Processed',
               badgeColor: '#a78bfa',

@@ -58,23 +58,19 @@ export default function App() {
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;
     
-    let videoUrl = `${DEFAULT_VIDEO}?v=20261121`;
-    let depthUrl = `${DEFAULT_DEPTH}?v=20261121`;
+    let videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4?v=20261121`;
+    let depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4?v=20261121`;
+    
     if (portalVideo === 'custom') {
       videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4?v=20261121`;
       depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4?v=20261121`;
-    } else if (portalVideo === 'bbb_sunflower') {
-      videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4?v=20261121`;
-      depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4?v=20261121`;
-    } else if (portalVideo === 'cows_demo') {
-      videoUrl = `${import.meta.env.BASE_URL}media/cows_demo_stereo.mp4?v=20261121`;
-      depthUrl = `${import.meta.env.BASE_URL}media/cows_demo_depth.mp4?v=20261121`;
-    } else if (portalVideo === 'svd_0001') {
-      videoUrl = `${import.meta.env.BASE_URL}media/svd_0001_stereo.mp4?v=20261121`;
-      depthUrl = `${import.meta.env.BASE_URL}media/svd_0001_depth.mp4?v=20261121`;
-    } else if (portalVideo === 'office_demo') {
-      videoUrl = `${import.meta.env.BASE_URL}media/office_demo_stereo.mp4?v=20261121`;
-      depthUrl = `${import.meta.env.BASE_URL}media/office_demo_depth.mp4?v=20261121`;
+    } else if (portalVideo === 'labubu') {
+      videoUrl = `${import.meta.env.BASE_URL}media/vid-labu1_sbs.mp4?v=20261121`;
+      depthUrl = `${import.meta.env.BASE_URL}media/vid-labu1_depth.mp4?v=20261121`;
+    } else if (portalVideo) {
+      // Fully dynamic fallback for all library and newly-processed IDs (fuarukee, bbb_sunflower, seal_demo, dancing_demo, cows_demo, svd_0001, office_demo, etc.)
+      videoUrl = `${import.meta.env.BASE_URL}media/${portalVideo}_stereo.mp4?v=20261121`;
+      depthUrl = `${import.meta.env.BASE_URL}media/${portalVideo}_depth.mp4?v=20261121`;
     }
 
     const scene = new StereoVideoScene(mountRef.current, videoUrl, DEFAULT_CAL, null);
@@ -339,10 +335,38 @@ export default function App() {
               <span>Source:</span>
               <button
                 type="button"
-                onClick={() => { setPortalVideo('bbb_sunflower'); setIsStereoSBS(true); }}
-                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'bbb_sunflower' ? '#e0c068' : '#1c2836', color: portalVideo === 'bbb_sunflower' ? '#000' : '#fff' }}
+                onClick={() => { setPortalVideo('fuarukee'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'fuarukee' ? '#e0c068' : '#1c2836', color: portalVideo === 'fuarukee' ? '#000' : '#fff' }}
               >
                 Fuarukee
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPortalVideo('bbb_sunflower'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'bbb_sunflower' ? '#ec4899' : '#1c2836', color: portalVideo === 'bbb_sunflower' ? '#000' : '#fff' }}
+              >
+                Bunny (2D)
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPortalVideo('seal_demo'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'seal_demo' ? '#3b82f6' : '#1c2836', color: portalVideo === 'seal_demo' ? '#000' : '#fff' }}
+              >
+                Seal
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPortalVideo('cows_demo'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'cows_demo' ? '#f59e0b' : '#1c2836', color: portalVideo === 'cows_demo' ? '#000' : '#fff' }}
+              >
+                Cows
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPortalVideo('dancing_demo'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'dancing_demo' ? '#10b981' : '#1c2836', color: portalVideo === 'dancing_demo' ? '#000' : '#fff' }}
+              >
+                Dancers
               </button>
               <button
                 type="button"
