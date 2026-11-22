@@ -58,19 +58,19 @@ export default function App() {
   useEffect(() => {
     if (appMode !== 'portal' || !mountRef.current) return;
     
-    let videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4?v=20261121`;
-    let depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4?v=20261121`;
+    let videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4?v=20261122`;
+    let depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4?v=20261122`;
     
     if (portalVideo === 'custom') {
-      videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4?v=20261121`;
-      depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4?v=20261121`;
+      videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4?v=20261122`;
+      depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4?v=20261122`;
     } else if (portalVideo === 'labubu') {
-      videoUrl = `${import.meta.env.BASE_URL}media/vid-labu1_sbs.mp4?v=20261121`;
-      depthUrl = `${import.meta.env.BASE_URL}media/vid-labu1_depth.mp4?v=20261121`;
+      videoUrl = `${import.meta.env.BASE_URL}media/vid-labu1_sbs.mp4?v=20261122`;
+      depthUrl = `${import.meta.env.BASE_URL}media/vid-labu1_depth.mp4?v=20261122`;
     } else if (portalVideo) {
       // Fully dynamic fallback for all library and newly-processed IDs (fuarukee, bbb_sunflower, seal_demo, dancing_demo, cows_demo, svd_0001, office_demo, etc.)
-      videoUrl = `${import.meta.env.BASE_URL}media/${portalVideo}_stereo.mp4?v=20261121`;
-      depthUrl = `${import.meta.env.BASE_URL}media/${portalVideo}_depth.mp4?v=20261121`;
+      videoUrl = `${import.meta.env.BASE_URL}media/${portalVideo}_stereo.mp4?v=20261122`;
+      depthUrl = `${import.meta.env.BASE_URL}media/${portalVideo}_depth.mp4?v=20261122`;
     }
 
     const scene = new StereoVideoScene(mountRef.current, videoUrl, DEFAULT_CAL, null);
@@ -335,10 +335,17 @@ export default function App() {
               <span>Source:</span>
               <button
                 type="button"
-                onClick={() => { setPortalVideo('nama_boxer'); setIsStereoSBS(true); }}
-                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'nama_boxer' ? '#e0c068' : '#1c2836', color: portalVideo === 'nama_boxer' ? '#000' : '#fff' }}
+                onClick={() => { setPortalVideo('fuarukee'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'fuarukee' ? '#e0c068' : '#1c2836', color: portalVideo === 'fuarukee' ? '#000' : '#fff' }}
               >
                 Fuarukee
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPortalVideo('nama_boxer'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'nama_boxer' ? '#f59e0b' : '#1c2836', color: portalVideo === 'nama_boxer' ? '#000' : '#fff' }}
+              >
+                Boxer
               </button>
               <button
                 type="button"

@@ -70,16 +70,16 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
     let cancelled = false;
     let scene: DepthMeshScene | null = null;
 
-    let fg = `${BASE}media/${selectedVideo}_rgb.mp4?v=20261121`;
-    let depth = `${BASE}media/${selectedVideo}_depth.mp4?v=20261121`;
-    let matte = `${BASE}media/${selectedVideo}_matte.mp4?v=20261121`;
-    let bg_target = `${BASE}media/${selectedVideo}_bg_clean.mp4?v=20261121`;
+    let fg = `${BASE}media/${selectedVideo}_rgb.mp4?v=20261122`;
+    let depth = `${BASE}media/${selectedVideo}_depth.mp4?v=20261122`;
+    let matte = `${BASE}media/${selectedVideo}_matte.mp4?v=20261122`;
+    let bg_target = `${BASE}media/${selectedVideo}_bg_clean.mp4?v=20261122`;
 
     if (selectedVideo === 'labubu') {
-      fg = `${BASE}media/vid-labu1.mp4?v=20261121`;
-      depth = `${BASE}media/vid-labu1_depth.mp4?v=20261121`;
-      matte = `${BASE}media/vid-labu1_matte.mp4?v=20261121`;
-      bg_target = `${BASE}media/vid-labu1_bg_clean.mp4?v=20261121`;
+      fg = `${BASE}media/vid-labu1.mp4?v=20261122`;
+      depth = `${BASE}media/vid-labu1_depth.mp4?v=20261122`;
+      matte = `${BASE}media/vid-labu1_matte.mp4?v=20261122`;
+      bg_target = `${BASE}media/vid-labu1_bg_clean.mp4?v=20261122`;
     }
     const bg_default = fg;
 

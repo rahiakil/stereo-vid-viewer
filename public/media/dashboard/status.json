@@ -1,17 +1,11 @@
 {
   "system": {
-    "cpu_usage_pct": 56.4,
-    "memory_usage_pct": 43.7,
+    "cpu_usage_pct": 11.0,
+    "memory_usage_pct": 43.0,
     "avg_processing_time_sec": 88.2,
     "total_processed": 9
   },
-  "queue": [
-    {
-      "name": "nama_boxer.mp4",
-      "status": "pending",
-      "progress": 0
-    }
-  ],
+  "queue": [],
   "history": [
     {
       "id": "nama_boxer",
