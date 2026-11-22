@@ -1,12 +1,29 @@
 {
   "system": {
-    "cpu_usage_pct": 11.5,
-    "memory_usage_pct": 44.5,
-    "avg_processing_time_sec": 85.0,
-    "total_processed": 7
+    "cpu_usage_pct": 52.1,
+    "memory_usage_pct": 42.3,
+    "avg_processing_time_sec": 86.3,
+    "total_processed": 8
   },
-  "queue": [],
+  "queue": [
+    {
+      "name": "bbb_sunflower.mp4",
+      "status": "pending",
+      "progress": 0
+    }
+  ],
   "history": [
+    {
+      "id": "bbb_sunflower",
+      "title": "Bbb Sunflower",
+      "duration_sec": 10.0,
+      "processing_time_sec": 162.4,
+      "parallax_variance": 0.0,
+      "status": "failed",
+      "left_screenshot": "media/dashboard/bbb_sunflower_left.png",
+      "right_screenshot": "media/dashboard/bbb_sunflower_right.png",
+      "description": "Processed 2D monocular video 'bbb_sunflower'. Depth estimated and reconstructed into 3D look-around mesh with empty in-painted background. (Optimized Relief: 0.16)"
+    },
     {
       "id": "svd_0001",
       "title": "SVD Spatial Video (iPhone 16 Pro)",

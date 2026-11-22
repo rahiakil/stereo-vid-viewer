@@ -63,7 +63,7 @@ export default function App() {
     if (portalVideo === 'custom') {
       videoUrl = `${import.meta.env.BASE_URL}media/custom_stereo.mp4?v=20261121`;
       depthUrl = `${import.meta.env.BASE_URL}media/custom_depth.mp4?v=20261121`;
-    } else if (portalVideo === 'fuarukee') {
+    } else if (portalVideo === 'bbb_sunflower') {
       videoUrl = `${import.meta.env.BASE_URL}media/fuarukee_stereo.mp4?v=20261121`;
       depthUrl = `${import.meta.env.BASE_URL}media/fuarukee_depth.mp4?v=20261121`;
     } else if (portalVideo === 'cows_demo') {
@@ -339,8 +339,8 @@ export default function App() {
               <span>Source:</span>
               <button
                 type="button"
-                onClick={() => { setPortalVideo('fuarukee'); setIsStereoSBS(true); }}
-                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'fuarukee' ? '#e0c068' : '#1c2836', color: portalVideo === 'fuarukee' ? '#000' : '#fff' }}
+                onClick={() => { setPortalVideo('bbb_sunflower'); setIsStereoSBS(true); }}
+                style={{ ...btnStyle, padding: '4px 8px', background: portalVideo === 'bbb_sunflower' ? '#e0c068' : '#1c2836', color: portalVideo === 'bbb_sunflower' ? '#000' : '#fff' }}
               >
                 Fuarukee
               </button>
