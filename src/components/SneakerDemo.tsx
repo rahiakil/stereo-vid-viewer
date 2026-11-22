@@ -57,7 +57,7 @@ export default function SneakerDemo({ defaultVideo }: SneakerDemoProps = {}) {
   }, [defaultVideo]);
 
   useEffect(() => {
-    const matteBypassVideos = ['fuarukee', 'seal_demo', 'cows_demo'];
+    const matteBypassVideos = ['fuarukee', 'seal_demo', 'cows_demo', 'svd_0001', 'bbb_sunflower'];
     setUseMatte(!matteBypassVideos.includes(selectedVideo));
   }, [selectedVideo]);
 

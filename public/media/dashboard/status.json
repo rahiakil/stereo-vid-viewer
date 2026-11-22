@@ -1,7 +1,7 @@
 {
   "system": {
-    "cpu_usage_pct": 10.4,
-    "memory_usage_pct": 44.3,
+    "cpu_usage_pct": 13.4,
+    "memory_usage_pct": 45.9,
     "avg_processing_time_sec": 86.3,
     "total_processed": 8
   },
@@ -9,24 +9,24 @@
   "history": [
     {
       "id": "bbb_sunflower",
-      "title": "Bbb Sunflower",
+      "title": "Bunny Sunflower (2D)",
       "duration_sec": 10.0,
       "processing_time_sec": 162.4,
-      "parallax_variance": 0.0,
-      "status": "failed",
+      "parallax_variance": 4.21,
+      "status": "success",
       "left_screenshot": "media/dashboard/bbb_sunflower_left.png",
       "right_screenshot": "media/dashboard/bbb_sunflower_right.png",
-      "description": "Processed 2D monocular video 'bbb_sunflower'. Depth estimated and reconstructed into 3D look-around mesh with empty in-painted background. (Optimized Relief: 0.16)"
+      "description": "Processed 2D monocular video 'bbb_sunflower'. Depth estimated and reconstructed into 3D look-around mesh with empty in-painted background. (Optimized Relief: 0.16) (Optimized Relief: 0.26)"
     },
     {
       "id": "svd_0001",
       "title": "SVD Spatial Video (iPhone 16 Pro)",
       "duration_sec": 5.0,
       "processing_time_sec": 18.6,
-      "parallax_variance": 5.25,
+      "parallax_variance": 0.0,
       "status": "success",
-      "left_screenshot": "media/dashboard/fuarukee_left.png",
-      "right_screenshot": "media/dashboard/fuarukee_right.png",
+      "left_screenshot": "media/dashboard/svd_0001_left.png",
+      "right_screenshot": "media/dashboard/svd_0001_right.png",
       "description": "True Apple iPhone 16 Pro Spatial Video (MV-HEVC) demuxed into Left and Right views and processed into depth-mesh. (Optimized Relief: 0.16)"
     },
     {

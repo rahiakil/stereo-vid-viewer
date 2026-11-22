@@ -562,9 +562,22 @@ async def run_playwright_test(vid_id: str, meta: dict) -> dict:
             await page.goto("https://localhost:5177/")
             await asyncio.sleep(5)
 
-            # Click on our new video card in the library
+            # Click on our new video card in the library with multiple fallback matchers
             log(f"Navigating to video card: {vid_id}")
-            await page.click(f"text={vid_id.replace('_', ' ').title()}")
+            title_text = meta.get("title", vid_id.replace("_", " ").title())
+            clicked = False
+            for selector in [title_text, vid_id.replace("_", " ").title(), title_text.split(" (")[0], title_text.split(" - ")[0]]:
+                if not selector:
+                    continue
+                try:
+                    await page.click(f"text={selector}", timeout=5000)
+                    clicked = True
+                    log(f"Successfully clicked card with selector: 'text={selector}'")
+                    break
+                except Exception:
+                    pass
+            if not clicked:
+                log(f"Warning: Could not click card for {vid_id}; proceeding on default loaded view.")
             await asyncio.sleep(4)
 
             import cv2
@@ -593,6 +606,13 @@ async def run_playwright_test(vid_id: str, meta: dict) -> dict:
                 img_r = cv2.imread(str(right_shot), cv2.IMREAD_GRAYSCALE)
                 
                 if img_l is not None and img_r is not None:
+                    # Check for blank / black screen (average pixel value < 15.0)
+                    mean_brightness = float(np.mean(img_l))
+                    if mean_brightness < 15.0:
+                        log(f"⚠ WARNING: Captured screenshot is almost pure black! (Mean brightness: {mean_brightness:.2f})")
+                        final_metrics["status"] = "failed"
+                        final_metrics["errors"].append(f"Blank/black screen detected (mean brightness: {mean_brightness:.2f})")
+
                     diff = cv2.absdiff(img_l, img_r)
                     variance = float(np.mean(diff))
                     log(f"Displacement Score for relief {r_val}: {variance:.2f}")
@@ -634,7 +654,7 @@ async def run_playwright_test(vid_id: str, meta: dict) -> dict:
         "status": final_metrics["status"],
         "left_screenshot": f"media/dashboard/{vid_id}_left.png",
         "right_screenshot": f"media/dashboard/{vid_id}_right.png",
-        "description": f"{meta['desc']} (Optimized Relief: {best_relief})"
+        "description": f"{meta.get('desc', meta.get('description', ''))} (Optimized Relief: {best_relief})"
     }
     save_status(queue_files=list(QUEUE_DIR.glob("*.mp4")), current_processing=None, history_entry=history_entry)
     

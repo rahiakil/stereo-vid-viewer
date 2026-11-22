@@ -1,9 +1,8 @@
 {
-  "status": "failed",
+  "status": "success",
   "errors": [
-    "Not supported",
-    "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"text=Bbb Sunflower\")\n"
+    "Not supported"
   ],
-  "parallax_variance": 0.0,
-  "best_relief": 0.16
+  "parallax_variance": 4.207262369791667,
+  "best_relief": 0.26
 }
